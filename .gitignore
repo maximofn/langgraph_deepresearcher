@@ -7,3 +7,6 @@
 
 # Material course
 material/
+
+# Pycache
+**/__pycache__/*
