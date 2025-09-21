@@ -10,3 +10,6 @@ material/
 
 # Pycache
 **/__pycache__/*
+
+# Environment variables
+**/.env
