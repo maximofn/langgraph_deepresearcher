@@ -25,7 +25,7 @@ from prompts.prompts import clarify_with_user_instructions, transform_messages_i
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 from today import get_today_str
 
-from LLM_models.LLM_models import SCOPE_MODEL
+from LLM_models.LLM_models import SCOPE_MODEL_NAME, SCOPE_MODEL_PROVIDER, SCOPE_MODEL_TEMPERATURE, GITHUB_BASE_URL
 
 from dotenv import load_dotenv
 import os
@@ -34,10 +34,17 @@ import os
 
 # Load environment variables
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
 
 # Initialize model
-model = init_chat_model(model=SCOPE_MODEL, temperature=0.0)
+model = init_chat_model(
+    model=SCOPE_MODEL_NAME, 
+    model_provider=SCOPE_MODEL_PROVIDER, 
+    api_key=GITHUB_API_KEY,
+    base_url=GITHUB_BASE_URL, 
+    temperature=SCOPE_MODEL_TEMPERATURE
+)
 
 # ===== WORKFLOW NODES =====
 

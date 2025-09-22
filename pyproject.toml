@@ -9,6 +9,7 @@ dependencies = [
     "grandalf>=0.8",
     "ipykernel>=6.30.1",
     "langchain>=0.3.27",
+    "langchain-community>=0.3.29",
     "langchain-openai>=0.3.33",
     "langgraph>=0.6.7",
     "rich>=14.1.0",

@@ -1,6 +1,14 @@
-OPENAI_GPT_4_1 = "openai:gpt-4.1"
-OPENAI_GPT_5 = "openai:gpt-5"
-OPENAI_GPT_5_MINI = "openai:gpt-5-mini"
-OPENAI_GPT_5_NANO = "openai:gpt-5-nano"
+OPENAI_GPT_4_1 = "gpt-4.1"
+OPENAI_GPT_5 = "openai/gpt-5"
+OPENAI_GPT_5_MINI = "gpt-5-mini"
+OPENAI_GPT_5_NANO = "gpt-5-nano"
 
-SCOPE_MODEL = OPENAI_GPT_4_1
+PROVIDER_OPENAI = "openai"
+PROVIDER_AZURE_OPENAI = "azure_openai"
+PROVIDER_GITHUB = "openai"
+
+GITHUB_BASE_URL = "https://models.github.ai/inference"
+
+SCOPE_MODEL_NAME = OPENAI_GPT_5
+SCOPE_MODEL_PROVIDER = PROVIDER_GITHUB
+SCOPE_MODEL_TEMPERATURE = 0.0
