@@ -13,3 +13,6 @@ material/
 
 # Environment variables
 **/.env
+
+# langgraph deepresearcher egg-info
+src/langgraph_deepresearcher.egg-info
