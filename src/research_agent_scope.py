@@ -36,6 +36,7 @@ import os
 load_dotenv()
 # OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
+LANGGRAPH_API_KEY = os.getenv("LANGGRAPH_API_KEY")
 
 # Initialize model
 model = init_chat_model(
@@ -116,4 +117,4 @@ deep_researcher_graph_builder.add_edge(START, "clarify_with_user")
 deep_researcher_graph_builder.add_edge("write_research_brief", END)
 
 # Compile the workflow
-# scope_research = deep_researcher_graph_builder.compile()
+scope_research = deep_researcher_graph_builder.compile()
