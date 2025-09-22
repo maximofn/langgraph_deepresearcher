@@ -21,7 +21,7 @@ from langchain_core.messages import HumanMessage, AIMessage, get_buffer_string
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command
 
-from prompts.prompts import clarify_with_user_instructions, transform_messages_into_research_topic_prompt
+from src_prompts.prompts import clarify_with_user_instructions, transform_messages_into_research_topic_prompt
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 from today import get_today_str
 
