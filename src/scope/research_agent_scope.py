@@ -21,10 +21,10 @@ from langchain_core.messages import HumanMessage, AIMessage, get_buffer_string
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command
 
-from src_prompts.prompts import clarify_with_user_instructions, transform_messages_into_research_topic_prompt
+from scope.scope_prompts import clarify_with_user_instructions, transform_messages_into_research_topic_prompt
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
-from today import get_today_str
 
+from utils.today import get_today_str
 from LLM_models.LLM_models import SCOPE_MODEL_NAME, SCOPE_MODEL_PROVIDER, SCOPE_MODEL_TEMPERATURE, SCOPE_MODEL_BASE_URL, SCOPE_MODEL_PROVIDER_API_KEY
 
 # ===== CONFIGURATION =====
