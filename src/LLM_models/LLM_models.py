@@ -1,5 +1,14 @@
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
+LANGGRAPH_API_KEY = os.getenv("LANGGRAPH_API_KEY")
+
 OPENAI_GPT_4_1 = "gpt-4.1"
-OPENAI_GPT_5 = "openai/gpt-5"
+OPENAI_GPT_5 = "gpt-5"
 OPENAI_GPT_5_MINI = "gpt-5-mini"
 OPENAI_GPT_5_NANO = "gpt-5-nano"
 
@@ -7,11 +16,14 @@ PROVIDER_OPENAI = "openai"
 PROVIDER_AZURE_OPENAI = "azure_openai"
 PROVIDER_GITHUB = "openai"
 
+OPENAI_BASE_URL = "https://api.openai.com/v1"
 GITHUB_BASE_URL = "https://models.github.ai/inference"
 
 SCOPE_MODEL_NAME = OPENAI_GPT_4_1
 SCOPE_MODEL_PROVIDER = PROVIDER_GITHUB
+SCOPE_MODEL_BASE_URL = GITHUB_BASE_URL
 SCOPE_MODEL_TEMPERATURE = 0.0
+SCOPE_MODEL_PROVIDER_API_KEY = GITHUB_API_KEY
 
 TEST_SCOPE_MODEL_NAME = OPENAI_GPT_4_1
 TEST_SCOPE_MODEL_PROVIDER = PROVIDER_GITHUB
