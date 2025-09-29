@@ -18,11 +18,11 @@ if PRINT_SCOPE_GRAPH: print(scope_graph.get_graph(xray=True).draw_ascii())
 if SAVE_SCOPE_GRAPH: scope_graph.get_graph(xray=True).draw_mermaid_png(output_file_path="scope_graph_xray.png")
 
 # Create thread and invoke the scope graph
-thread = {"configurable": {"thread_id": "1"}}
-result = scope_graph.invoke({"messages": [HumanMessage(content="Quiero investigar las mejores cafeterías de Madrid.")]}, config=thread)
+# thread = {"configurable": {"thread_id": "1"}}
+# result = scope_graph.invoke({"messages": [HumanMessage(content="Quiero investigar las mejores cafeterías de Madrid.")]}, config=thread)
+# # format_messages(result['messages'])
+
+# result = scope_graph.invoke({"messages": [HumanMessage(content="Examina la calidad del café para evaluar las mejores cafeterías de Madrid.")]}, config=thread)
+
 # format_messages(result['messages'])
-
-result = scope_graph.invoke({"messages": [HumanMessage(content="Examina la calidad del café para evaluar las mejores cafeterías de Madrid.")]}, config=thread)
-
-format_messages(result['messages'])
-format_messages(result['research_brief'], title="🔍 Research Brief", border_style="purple")
+# format_messages(result['research_brief'], title="🔍 Research Brief", border_style="purple")
