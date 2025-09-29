@@ -5,19 +5,23 @@ import os
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
 LANGGRAPH_API_KEY = os.getenv("LANGGRAPH_API_KEY")
 
 OPENAI_GPT_4_1 = "gpt-4.1"
 OPENAI_GPT_5 = "gpt-5"
 OPENAI_GPT_5_MINI = "gpt-5-mini"
 OPENAI_GPT_5_NANO = "gpt-5-nano"
+QWEN3_CODER_480B = "qwen-3-coder-480b"
 
 PROVIDER_OPENAI = "openai"
 PROVIDER_AZURE_OPENAI = "azure_openai"
 PROVIDER_GITHUB = "openai"
+PROVIDER_CEREBRAS = "openai"
 
 OPENAI_BASE_URL = "https://api.openai.com/v1"
 GITHUB_BASE_URL = "https://models.github.ai/inference"
+CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
 
 SCOPE_MODEL_NAME = OPENAI_GPT_4_1
 SCOPE_MODEL_PROVIDER = PROVIDER_GITHUB
