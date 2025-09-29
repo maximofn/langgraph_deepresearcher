@@ -6,20 +6,19 @@ import os
 from langsmith import Client
 from dotenv import load_dotenv
 
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 
 from test_prompts.prompts import BRIEF_CRITERIA_PROMPT, BRIEF_HALLUCINATION_PROMPT
 
-from typing_extensions import cast
 from pydantic import BaseModel, Field
-from langchain_openai import ChatOpenAI
 from langchain.chat_models import init_chat_model
 
 # Add ../src to the path
 import sys
 sys.path.append("../src")
 
-from LLM_models.LLM_models import TEST_SCOPE_MODEL_NAME, TEST_SCOPE_MODEL_PROVIDER, TEST_SCOPE_MODEL_TEMPERATURE, GITHUB_BASE_URL
+from LLM_models.LLM_models import TEST_SCOPE_MODEL_NAME, TEST_SCOPE_MODEL_PROVIDER, TEST_SCOPE_MODEL_TEMPERATURE, TEST_SCOPE_MODEL_BASE_URL, TEST_SCOPE_MODEL_PROVIDER_API_KEY
+from dataset.dataset import conversation_1, conversation_2, criteria_1, criteria_2
 from langgraph_deepresearch import scope_graph
 
 import uuid
@@ -30,58 +29,28 @@ load_dotenv()
 LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
 LANGSMITH_ENDPOINT = os.getenv("LANGSMITH_ENDPOINT")
 LANGSMITH_PROJECT = os.getenv("LANGSMITH_PROJECT")
-GITHUB_API_KEY = os.getenv("GITHUB_API_KEY")
-GITHUB_BASE_URL = os.getenv("GITHUB_BASE_URL")
 
 os.environ["LANGSMITH_TRACING_V2"] = "true"
 os.environ["LANGSMITH_API_KEY"] = LANGSMITH_API_KEY
 os.environ["LANGSMITH_ENDPOINT"] = LANGSMITH_ENDPOINT
 os.environ["LANGSMITH_PROJECT"] = LANGSMITH_PROJECT
 
-langsmith_client = Client(api_key=LANGSMITH_API_KEY)
-
-# ===== DATASET =====
-# Create the conversation
-conversation_1 = [
-    HumanMessage(content="¿Cuál es la mejor manera de invertir 50.000 € para la jubilación?"),
-    AIMessage(content="Puedes proporcionarme información adicional para adaptar el asesoramiento de inversión a tu objetivo de jubilación de $50.000 €? En concreto:\n * Tu edad actual o la edad a la que deseas jubilarte\n * Tu tolerancia al riesgo (baja, media, alta)\n * Cualquier preferencia en cuanto a tipos de inversión (por ejemplo, acciones, bonos, fondos de inversión, bienes inmuebles)\n * Si inviertes a través de una cuenta con ventajas fiscales (por ejemplo, IRA, 401(k)) o una cuenta de corretaje normal\nEsto me ayudará a ofrecerle sugerencias más personalizadas y relevantes."),
-    HumanMessage(content="Tengo 25 años y quiero jubilarme a los 45. Ahora mismo tengo una alta tolerancia al riesgo, pero creo que irá disminuyendo con el tiempo. He oído que las acciones y los ETF son una buena opción, pero estoy abierto a cualquier posibilidad. Ya tengo un plan 401k, pero esto sería solo a través de una cuenta de corretaje normal."),
-]
-
-conversation_2 = [
-    HumanMessage(content="Estoy buscando un piso en Madrid, ¿me puedes ayudar?"),
-    AIMessage(content="¿Podrías especificar tus preferencias en cuanto al piso? Por ejemplo:\n * Barrios o distritos deseados\n * Número de dormitorios/baños\n * Rango de presupuesto (alquiler mensual)\n * Cualquier comodidad o característica imprescindible\n * Fecha de mudanza preferida\nEsta información me ayudará a ofrecerte las opciones de apartamentos más relevantes en Madrid."),
-    HumanMessage(content="Prefiero vivir en Lavapies, Chueca o Salamanca. Busco un piso de dos dormitorios y dos baños, con un alquiler mensual inferior a 1000 €. Me gustaría que fuera un edificio con portero, pero no pasa nada si no lo tiene. Sería un plus que cerca hubiera un gimnasio. Y me gustaría mudarme en diciembre de 2025."),
-]
-
-criteria_1 = [
-    "Current age is 25 años",
-    "Desired retirement age is 45",
-    "Current risk tolerance is high",
-    "Interested in investing in stocks and ETFs",
-    "Open to forms of investment beyond stocks and ETFs"
-    "Investment account is a regular brokerage account",
-]
-
-criteria_2 = [
-    "Looking for a 2 bed 2 bath apartment in Lavapies, Chueca, or Salamanca",
-    "Monthly rent below 1000 €",
-    "Should be in a doorman building, but not strict",
-    "Ideally have a near by gym but not strict",
-    "Move in date is December 2025"
-]
+print("Creating LangSmith client...")
+langsmith_client = Client()
 
 # Create the dataset
 dataset_name = "deep_research_scoping"
 if not langsmith_client.has_dataset(dataset_name=dataset_name):
     
     # Create the dataset
+    print("Creating dataset...")
     dataset = langsmith_client.create_dataset(
         dataset_name=dataset_name,
         description="A dataset that measures the quality of research briefs generated from an input conversation",
     )
 
     # Add the examples to the dataset
+    print("Adding examples to the dataset...")
     langsmith_client.create_examples(
         dataset_id=dataset.id,
         examples=[
@@ -112,7 +81,7 @@ class Criteria(BaseModel):
     reasoning: str = Field(
         description="Detailed explanation of why this criteria is or isn't captured in the research brief, including specific evidence from the brief"
     )
-    is_captured: bool = Field(
+    is_criterion_captured: bool = Field(
         description="Whether this specific criteria is adequately captured in the research brief (True) or missing/inadequately addressed (False)"
     )
 
@@ -130,20 +99,21 @@ def evaluate_success_criteria(outputs: dict, reference_outputs: dict):
     Returns:
         Dict with evaluation results including score (0.0 to 1.0)
     """
+    print("\n"+"*"*100)
+    print(f"Evaluating success criteria...")
+
     research_brief = outputs["research_brief"]
     success_criteria = reference_outputs["criteria"]
 
-    model = ChatOpenAI(
-        model=TEST_SCOPE_MODEL_NAME,
+    print(f"\tResearch Brief: {research_brief}")
+
+    model = init_chat_model(
+        model=TEST_SCOPE_MODEL_NAME, 
+        model_provider=TEST_SCOPE_MODEL_PROVIDER, 
+        api_key=TEST_SCOPE_MODEL_PROVIDER_API_KEY,
+        base_url=TEST_SCOPE_MODEL_BASE_URL, 
         temperature=TEST_SCOPE_MODEL_TEMPERATURE
     )
-    # model = init_chat_model(
-    #     model=TEST_SCOPE_MODEL_NAME, 
-    #     model_provider=TEST_SCOPE_MODEL_PROVIDER, 
-    #     api_key=GITHUB_API_KEY,
-    #     base_url=GITHUB_BASE_URL, 
-    #     temperature=TEST_SCOPE_MODEL_TEMPERATURE
-    # )
     structured_output_model = model.with_structured_output(Criteria)
     
     # Run evals
@@ -157,35 +127,41 @@ def evaluate_success_criteria(outputs: dict, reference_outputs: dict):
         )
     ] 
     for criterion in success_criteria])
+
+    for criterion, response in zip(success_criteria, responses):
+        print(f"\tCriterion: {criterion}, reasoning: {response.reasoning}, is criterion captured: {response.is_criterion_captured}")
+        print(f"\t\treasoning: {response.reasoning}")
+        print(f"\t\tis criterion captured: {response.is_criterion_captured}")
     
     # Ensure the criteria_text field is populated correctly
     individual_evaluations = [
         Criteria(
             reasoning=response.reasoning,
             criteria_text=criterion,
-            is_captured=response.is_captured
+            is_criterion_captured=response.is_criterion_captured
         )
         for criterion, response in zip(success_criteria, responses)
     ]
     
     # Calculate overall score as percentage of captured criteria
-    captured_count = sum(1 for eval_result in individual_evaluations if eval_result.is_captured)
+    captured_count = sum(1 for eval_result in individual_evaluations if eval_result.is_criterion_captured)
     total_count = len(individual_evaluations)
+    score = captured_count / total_count if total_count > 0 else 0.0
+    print(f"\tSuccess Criteria score: {score} (captured {captured_count} out of {total_count} criteria)")
     
     return {
         "key": "success_criteria_score", 
-        "score": captured_count / total_count if total_count > 0 else 0.0,
+        "score": score,
         "individual_evaluations": [
             {
                 "criteria": eval_result.criteria_text,
-                "captured": eval_result.is_captured,
+                "captured": eval_result.is_criterion_captured,
                 "reasoning": eval_result.reasoning
             }
             for eval_result in individual_evaluations
         ]
     }
 
-# ===== EVALUATION FUNCTIONS =====
 # Improved NoAssumptions class with reasoning field and enhanced descriptions
 class NoAssumptions(BaseModel):
     """
@@ -217,20 +193,21 @@ def evaluate_no_assumptions(outputs: dict, reference_outputs: dict):
     Returns:
         Dict with evaluation results including boolean score and detailed reasoning
     """
+    print("\n"+"*"*100)
+    print(f"Evaluating no assumptions...")
+
     research_brief = outputs["research_brief"]
     success_criteria = reference_outputs["criteria"]
 
-    model = ChatOpenAI(
-        model=TEST_SCOPE_MODEL_NAME,
+    print(f"\tResearch Brief: {research_brief}")
+
+    model = init_chat_model(
+        model=TEST_SCOPE_MODEL_NAME, 
+        model_provider=TEST_SCOPE_MODEL_PROVIDER, 
+        api_key=TEST_SCOPE_MODEL_PROVIDER_API_KEY,
+        base_url=TEST_SCOPE_MODEL_BASE_URL, 
         temperature=TEST_SCOPE_MODEL_TEMPERATURE
     )
-    # model = init_chat_model(
-    #     model=TEST_SCOPE_MODEL_NAME, 
-    #     model_provider=TEST_SCOPE_MODEL_PROVIDER, 
-    #     api_key=GITHUB_API_KEY,
-    #     base_url=GITHUB_BASE_URL, 
-    #     temperature=TEST_SCOPE_MODEL_TEMPERATURE
-    # )
     structured_output_model = model.with_structured_output(NoAssumptions)
     
     response = structured_output_model.invoke([
@@ -239,6 +216,9 @@ def evaluate_no_assumptions(outputs: dict, reference_outputs: dict):
             success_criteria=str(success_criteria)
         ))
     ])
+
+    print(f"\tNo Assumptions reasoning: {response.reasoning}")
+    print(f"\tNo Assumptions score: {response.no_assumptions}")
     
     return {
         "key": "no_assumptions_score", 
