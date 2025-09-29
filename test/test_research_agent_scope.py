@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from langchain_core.messages import HumanMessage
 
-from test_prompts.prompts import BRIEF_CRITERIA_PROMPT, BRIEF_HALLUCINATION_PROMPT
+from test_prompts.scope_prompts import BRIEF_CRITERIA_PROMPT, BRIEF_HALLUCINATION_PROMPT
 
 from pydantic import BaseModel, Field
 from langchain.chat_models import init_chat_model
@@ -18,7 +18,7 @@ import sys
 sys.path.append("../src")
 
 from LLM_models.LLM_models import TEST_SCOPE_MODEL_NAME, TEST_SCOPE_MODEL_PROVIDER, TEST_SCOPE_MODEL_TEMPERATURE, TEST_SCOPE_MODEL_BASE_URL, TEST_SCOPE_MODEL_PROVIDER_API_KEY
-from dataset.dataset import conversation_1, conversation_2, criteria_1, criteria_2
+from dataset.scope_dataset import conversation_1, conversation_2, criteria_1, criteria_2
 from langgraph_deepresearch import scope_graph
 
 import uuid
