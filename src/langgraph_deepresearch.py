@@ -5,7 +5,7 @@ LangGraph Deep Research
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import HumanMessage
 
-from scope.research_agent_scope import deep_researcher_graph_builder
+from scope.scope_agent import deep_researcher_graph_builder
 
 from utils.message_utils import format_messages
 
