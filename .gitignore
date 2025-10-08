@@ -16,3 +16,6 @@ material/
 
 # langgraph deepresearcher egg-info
 src/langgraph_deepresearcher.egg-info
+
+# VSCode launch.json
+.vscode/launch.json
