@@ -1,0 +1,11 @@
+Project Notes - Deep Researcher
+
+This is a sample document for testing the MCP filesystem server.
+
+The Model Context Protocol (MCP) allows AI models to interact with external tools and data sources in a standardized way.
+
+Benefits:
+- Standardized interface for tool calling
+- Easy integration with multiple services
+- Secure and controlled access to resources
+

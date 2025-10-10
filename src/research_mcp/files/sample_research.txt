@@ -1,0 +1,15 @@
+Research Document: Introduction to LangGraph
+
+LangGraph is a framework for building stateful, multi-actor applications with Large Language Models (LLMs).
+
+Key Features:
+- State management for complex workflows
+- Support for cyclic graphs
+- Built on top of LangChain
+- Excellent for multi-agent systems
+
+Use Cases:
+- Research agents that gather information iteratively
+- Chatbots with memory and context
+- Complex decision-making systems
+
