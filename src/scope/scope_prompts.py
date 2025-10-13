@@ -2,7 +2,7 @@
 Prompt templates for the deep research system.
 
 This module contains all prompt templates used across the research workflow components,
-including user clarification, research brief generation, and report synthesis.
+including user clarification and research brief generation.
 """
 
 clarify_with_user_instructions="""
