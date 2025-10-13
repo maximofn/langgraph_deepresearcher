@@ -62,7 +62,8 @@ def llm_call(state: ResearcherState):
     
     # Show progress bar while waiting for LLM response
     print("⏳ Researcher agent:")
-    format_messages([state.get("researcher_messages", [])[-1]])
+    if isinstance(state.get('researcher_messages', [])[-1], HumanMessage):
+        format_messages([state.get("researcher_messages", [])[-1]], title="Researcher Agent - Simulated Human Message")
     with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
         research_messages = model_with_tools.invoke(
             [SystemMessage(content=research_agent_prompt)] + state["researcher_messages"]
@@ -70,7 +71,7 @@ def llm_call(state: ResearcherState):
         bar()  # Complete the progress bar
     
     # Format and display the research messages
-    format_messages([research_messages])
+    format_messages([research_messages], title="Researcher Agent response")
 
     # Return the research messages
     return {
@@ -94,12 +95,11 @@ def tool_node(state: ResearcherState):
         name="Tool Calls",
         args=tool_calls,
         id="tool_call_id"
-    )])
+    )], title="Researcher Agent - Tool calls")
  
     # Execute all tool calls
     observations = []
     for tool_call in tool_calls:
-        print(f"⏳ Executing Tool Call: {tool_call['name']} - {tool_call['args']}")
         with alive_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
             tool = tools_by_name[tool_call["name"]]
             observation = tool.invoke(tool_call["args"])
@@ -111,7 +111,7 @@ def tool_node(state: ResearcherState):
             content=observation,
             name=tool_call["name"],
             tool_call_id=tool_call["id"]
-        )])
+        )], title="Researcher Agent - Tool calls result")
 
     # Create tool message outputs
     tool_outputs = [
@@ -141,7 +141,7 @@ def compress_research(state: ResearcherState) -> dict:
         bar()
     
     # Format and display the compressed research
-    format_messages([response])
+    format_messages([response], title="Researcher Agent - Compressed Research")
 
     # Extract raw notes from tool and AI messages
     raw_notes = [
@@ -178,7 +178,7 @@ def should_continue(state: ResearcherState) -> Literal["tool_node", "compress_re
         decision_message = SystemMessage(
             content="Last message contains tool calls. Continuing to tool execution..."
         )
-        format_messages([decision_message])
+        format_messages([decision_message], title="Researcher Agent - Should continue")
         return "tool_node"
     # Otherwise, we have a final answer
     else:
@@ -186,7 +186,7 @@ def should_continue(state: ResearcherState) -> Literal["tool_node", "compress_re
         decision_message = SystemMessage(
             content="No tool calls found. Stopping research and compressing findings..."
         )
-        format_messages([decision_message])
+        format_messages([decision_message], title="Researcher Agent - Should compress research")
         return "compress_research"
 
 # ===== GRAPH CONSTRUCTION =====

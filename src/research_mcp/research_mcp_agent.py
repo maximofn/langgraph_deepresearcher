@@ -98,7 +98,7 @@ async def llm_call(state: ResearcherState):
     model_with_tools = model.bind_tools(tools)
     
     # Show progress bar while waiting for LLM response
-    print("⏳ Researcher agent:")
+    print("⏳ MCP Researcher agent:")
     format_messages([state.get("researcher_messages", [])[-1]])
     with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
         research_messages = model_with_tools.invoke(

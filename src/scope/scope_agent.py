@@ -52,7 +52,7 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
     """
 
     print("⏳ Scope agent:")
-    format_messages([state.get("messages", [])[-1]])
+    format_messages([state.get("messages", [])[-1]], title="Real Human Message", msg_subtype='RealHumanMessage')
 
     # Set up structured output model
     structured_output_model = model.with_structured_output(ClarifyWithUser)
@@ -68,7 +68,7 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
         bar()
     
     # Format and display the research messages
-    format_messages([response])
+    format_messages([response], title="Scope Assistant - need clarification?")
     
     # Route based on clarification need
     if response.need_clarification:
@@ -76,7 +76,7 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
         routing_message = SystemMessage(
             content="Necesita aclaración por parte del usuario. Enviando pregunta aclaratoria..."
         )
-        format_messages([routing_message])
+        format_messages([routing_message], title="Scope System Message")
         return Command(
             goto=END, 
             update={"messages": [AIMessage(content=response.question)]}
@@ -86,7 +86,7 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
         routing_message = SystemMessage(
             content="No necesita aclaración por parte del usuario. Enviando mensaje de verificación..."
         )
-        format_messages([routing_message])
+        format_messages([routing_message], title="Scope System Message")
         return Command(
             goto="write_research_brief", 
             update={"messages": [AIMessage(content=response.verification)]}
@@ -103,7 +103,7 @@ def write_research_brief(state: AgentState):
     structured_output_model = model.with_structured_output(ResearchQuestion)
 
     print("⏳ Scope agent - Write research brief:")
-    format_messages([state.get("messages", [])[-1]])
+    format_messages([state.get("messages", [])[-1]], title="Scope Assistant - Write research brief")
     
     # Generate research brief from conversation history
     with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
@@ -116,7 +116,7 @@ def write_research_brief(state: AgentState):
         bar()
     
     # Format and display the research brief
-    format_messages([response])
+    format_messages([response], title="Scope Assistant - Research brief generated")
     
     # Update state with generated research brief and pass it to the supervisor
     return {

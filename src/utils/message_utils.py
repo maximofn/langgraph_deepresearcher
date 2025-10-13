@@ -176,8 +176,15 @@ def format_message_content(message):
     return "\n".join(parts)
 
 
-def format_messages(messages, title: str = "", border_style: str = "white"):
-    """Format and display a list of messages with Rich formatting"""
+def format_messages(messages, title: str = "", border_style: str = "white", msg_subtype: str = ""):
+    """Format and display a list of messages with Rich formatting
+    
+    Args:
+        messages: List of messages to format
+        title: Title of the panel
+        border_style: Border style of the panel
+        msg_subtype: Subtype of the message
+    """
     # Check if messages is a list
     if isinstance(messages, list):
         for m in messages:
@@ -194,19 +201,67 @@ def format_messages(messages, title: str = "", border_style: str = "white"):
             content = format_message_content(m)
 
             if msg_type == 'Human':
-                console.print(Panel(content, title="🧑 Human", border_style="blue"))
-            elif msg_type == 'Ai':
-                console.print(Panel(content, title="🤖 Assistant", border_style="green"))
+                if msg_subtype == 'RealHumanMessage':
+                    if title == "":
+                        title = "🧑 Real Human Message"
+                    else:
+                        title = f"🧑 {title}"
+                    console.print(Panel(content, title=title, border_style="#201ADB"))    # Blue
+                else:
+                    if title == "":
+                        title = "🧑 Simulated Human Message"
+                    else:
+                        title = f"🧑 {title}"
+                    console.print(Panel(content, title=title, border_style="#1A64DB"))    # Blue
+            elif msg_type == 'AI':
+                if title == "":
+                    title = "🤖 Assistant"
+                else:
+                    title = f"🤖 {title}"
+                console.print(Panel(content, title=title, border_style="#24FA00"))    # Green
+            elif msg_type == 'ClarifyWithUser':
+                if title == "":
+                    title = "🤖 Clarify With User"
+                else:
+                    title = f"🤖 {title}"
+                console.print(Panel(content, title=title, border_style="#37DB1A"))    # Green
+            elif msg_type == 'ResearchQuestion':
+                if title == "":
+                    title = "🤖 Research brief generated"
+                else:
+                    title = f"🤖 {title}"
+                console.print(Panel(content, title=title, border_style="#37DB1A"))    # Green
             elif msg_type == 'Tool':
-                console.print(Panel(content, title="🔧 Tool Output", border_style="yellow"))
+                if title == "":
+                    title = "🔧 Tool Output"
+                else:
+                    title = f"🔧 {title}"
+                console.print(Panel(content, title=title, border_style="yellow"))
             elif msg_type == 'ToolCall':
-                console.print(Panel(content, title="🔧 Tool Calls", border_style="magenta"))
+                if title == "":
+                    title = "🔧 Tool Calls"
+                else:
+                    title = f"🔧 {title}"
+                console.print(Panel(content, title=title, border_style="magenta"))
             elif msg_type == 'Use tools':
-                console.print(Panel(content, title="🔧 Tool Output", border_style="yellow"))
+                if title == "":
+                    title = "🔧 Tool Output"
+                else:
+                    title = f"🔧 {title}"
+                console.print(Panel(content, title=title, border_style="yellow"))
             elif msg_type == 'System':
-                console.print(Panel(content, title="🔧 System Message", border_style="red"))
+                if title == "":
+                    title = "🔧 System Message"
+                else:
+                    title = f"🔧 {title}"
+                console.print(Panel(content, title=title, border_style="red"))
             else:
-                console.print(Panel(content, title=f"📝 {msg_type}", border_style="white"))
+                print(f"msg_type: {msg_type}")
+                if title == "":
+                    title = f"📝 {msg_type}"
+                else:
+                    title = f"📝 {title}"
+                console.print(Panel(content, title=title, border_style="white"))
     elif isinstance(messages, str):
         console.print(Panel(messages, title=title, border_style=border_style))
     else:
