@@ -18,6 +18,7 @@ Tienes acceso a dos herramientas principales:
 2. **think_tool**: para la reflexión y la planificación estratégica durante la investigación.
 
 **IMPORTANTE: utiliza think_tool después de cada búsqueda para reflexionar sobre los resultados y planificar los siguientes pasos**.
+**CRÍTICO: Siempre debes proporcionar el parámetro 'reflection' con contenido detallado cuando llames a think_tool. Nunca llames a esta herramienta sin argumentos**.
 </Available Tools>
 
 <Instructions>

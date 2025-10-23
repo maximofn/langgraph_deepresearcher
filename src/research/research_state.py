@@ -93,7 +93,10 @@ def tavily_search(
 
 @tool(parse_docstring=True)
 def think_tool(reflection: str = "") -> str:
-    """Tool for strategic reflection on research progress and decision-making.
+    """Record your strategic reflection on research progress (REQUIRED).
+
+    You MUST provide a detailed reflection analyzing your current findings,
+    gaps, and next steps. Never call this tool without providing reflection text.
 
     Use this tool after each search to analyze results and plan next steps systematically.
     This creates a deliberate pause in the research workflow for quality decision-making.
@@ -104,14 +107,13 @@ def think_tool(reflection: str = "") -> str:
     - When assessing research gaps: What specific information am I still missing?
     - Before concluding research: Can I provide a complete answer now?
 
-    Reflection should address:
-    1. Analysis of current findings - What concrete information have I gathered?
-    2. Gap assessment - What crucial information is still missing?
-    3. Quality evaluation - Do I have sufficient evidence/examples for a good answer?
-    4. Strategic decision - Should I continue searching or provide my answer?
-
     Args:
-        reflection: Your detailed reflection on research progress, findings, gaps, and next steps
+        reflection: (REQUIRED) Your detailed reflection on research progress, findings, gaps, and next steps.
+                   Must include:
+                   - Analysis of current findings: What concrete information have I gathered?
+                   - Gap assessment: What crucial information is still missing?
+                   - Quality evaluation: Do I have sufficient evidence/examples for a good answer?
+                   - Strategic decision: Should I continue searching or provide my answer?
     """
     if not reflection:
         return "Reflection recorded: [No reflection provided]"
