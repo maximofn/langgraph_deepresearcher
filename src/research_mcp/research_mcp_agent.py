@@ -14,6 +14,8 @@ Key features:
 """
 
 import os
+import traceback
+import sys
 
 from typing_extensions import Literal
 
@@ -87,34 +89,51 @@ async def llm_call(state: ResearcherState):
     Returns updated state with model response.
     """
     
-    # Get available tools from MCP server
-    client = get_mcp_client()
-    mcp_tools = await client.get_tools()
+    try:
+        # Get available tools from MCP server
+        client = get_mcp_client()
+        mcp_tools = await client.get_tools()
 
-    # Use MCP tools for local document access
-    tools = mcp_tools + [think_tool]
+        # Use MCP tools for local document access
+        tools = mcp_tools + [think_tool]
 
-    # Initialize model with tool binding
-    model_with_tools = model.bind_tools(tools)
+        # Initialize model with tool binding
+        model_with_tools = model.bind_tools(tools)
+        
+        # Show progress bar while waiting for LLM response
+        print("⏳ MCP Researcher agent:")
+        format_messages([state.get("researcher_messages", [])[-1]])
+        with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+            research_messages = model_with_tools.invoke(
+                [SystemMessage(content=research_agent_prompt_with_mcp.format(date=get_today_str()))] + state["researcher_messages"]
+            )
+            bar()  # Complete the progress bar
+        
+        # Format and display the research messages
+        format_messages([research_messages])
+
+        # Process user input with system prompt
+        return {
+            "researcher_messages": [
+                research_messages
+            ]
+        }
     
-    # Show progress bar while waiting for LLM response
-    print("⏳ MCP Researcher agent:")
-    format_messages([state.get("researcher_messages", [])[-1]])
-    with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
-        research_messages = model_with_tools.invoke(
-            [SystemMessage(content=research_agent_prompt_with_mcp.format(date=get_today_str()))] + state["researcher_messages"]
-        )
-        bar()  # Complete the progress bar
-    
-    # Format and display the research messages
-    format_messages([research_messages])
-
-    # Process user input with system prompt
-    return {
-        "researcher_messages": [
-            research_messages
-        ]
-    }
+    except Exception as e:
+        # Get the traceback information
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
+        
+        # Print detailed error information
+        print(f"\n❌ Error in llm_call function:")
+        print(f"   Line number: {line_number}")
+        print(f"   Error type: {type(e).__name__}")
+        print(f"   Error message: {str(e)}")
+        print(f"\n   Full traceback:")
+        traceback.print_exc()
+        
+        # Re-raise the exception to let the caller handle it
+        raise
 
 async def tool_node(state: ResearcherState):
     """Execute tool calls using MCP tools.
@@ -128,61 +147,78 @@ async def tool_node(state: ResearcherState):
     with the MCP server subprocess. This is unavoidable.
     """
 
-    # Get the tool calls
-    tool_calls = state["researcher_messages"][-1].tool_calls
+    try:
+        # Get the tool calls
+        tool_calls = state["researcher_messages"][-1].tool_calls
 
-    # Format the tool calls
-    format_messages([ToolCall(
-        name="Tool Calls",
-        args=tool_calls,
-        id="tool_call_id"
-    )])
+        # Format the tool calls
+        format_messages([ToolCall(
+            name="Tool Calls",
+            args=tool_calls,
+            id="tool_call_id"
+        )])
 
-    async def execute_tools():
-        """Execute all tool calls. MCP tools require async execution."""
-        # Get fresh tool references from MCP server
-        client = get_mcp_client()
-        mcp_tools = await client.get_tools()
-        tools = mcp_tools + [think_tool]
-        tools_by_name = {tool.name: tool for tool in tools}
+        async def execute_tools():
+            """Execute all tool calls. MCP tools require async execution."""
+            # Get fresh tool references from MCP server
+            client = get_mcp_client()
+            mcp_tools = await client.get_tools()
+            tools = mcp_tools + [think_tool]
+            tools_by_name = {tool.name: tool for tool in tools}
 
-        # Execute tool calls (sequentially for reliability)
-        observations = []
-        for tool_call in tool_calls:
-            print(f"⏳ Executing Tool Call: {tool_call['name']} - {tool_call['args']}")
-            with alive_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
-                tool = tools_by_name[tool_call["name"]]
-                if tool_call["name"] == "think_tool":
-                    # think_tool is sync, use regular invoke
-                    observation = tool.invoke(tool_call["args"])
-                else:
-                    # MCP tools are async, use ainvoke
-                    observation = await tool.ainvoke(tool_call["args"])
-                observations.append(observation)
-            bar()
+            # Execute tool calls (sequentially for reliability)
+            observations = []
+            for tool_call in tool_calls:
+                print(f"⏳ Executing Tool Call: {tool_call['name']} - {tool_call['args']}")
+                with alive_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
+                    tool = tools_by_name[tool_call["name"]]
+                    if tool_call["name"] == "think_tool":
+                        # think_tool is sync, use regular invoke
+                        observation = tool.invoke(tool_call["args"])
+                    else:
+                        # MCP tools are async, use ainvoke
+                        observation = await tool.ainvoke(tool_call["args"])
+                    observations.append(observation)
+                bar()
+            
+                # Format and display the result immediately
+                format_messages([ToolMessage(
+                    content=observation,
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"]
+                )])
+
+            # Format results as tool messages
+            tool_outputs = [
+                ToolMessage(
+                    content=observation,
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"],
+                )
+                for observation, tool_call in zip(observations, tool_calls)
+            ]
+
+            return tool_outputs
+
+        messages = await execute_tools()
+
+        return {"researcher_messages": messages}
+    
+    except Exception as e:
+        # Get the traceback information
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
         
-            # Format and display the result immediately
-            format_messages([ToolMessage(
-                content=observation,
-                name=tool_call["name"],
-                tool_call_id=tool_call["id"]
-            )])
-
-        # Format results as tool messages
-        tool_outputs = [
-            ToolMessage(
-                content=observation,
-                name=tool_call["name"],
-                tool_call_id=tool_call["id"],
-            )
-            for observation, tool_call in zip(observations, tool_calls)
-        ]
-
-        return tool_outputs
-
-    messages = await execute_tools()
-
-    return {"researcher_messages": messages}
+        # Print detailed error information
+        print(f"\n❌ Error in tool_node function:")
+        print(f"   Line number: {line_number}")
+        print(f"   Error type: {type(e).__name__}")
+        print(f"   Error message: {str(e)}")
+        print(f"\n   Full traceback:")
+        traceback.print_exc()
+        
+        # Re-raise the exception to let the caller handle it
+        raise
 
 def compress_research(state: ResearcherState) -> dict:
     """Compress research findings into a concise summary.
@@ -194,29 +230,46 @@ def compress_research(state: ResearcherState) -> dict:
     file-based research content from MCP tools.
     """
     
-    system_message = compress_research_system_prompt.format(date=get_today_str())
-    messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
+    try:
+        system_message = compress_research_system_prompt.format(date=get_today_str())
+        messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
 
-    print("⏳ Compressing Research:")
-    with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
-        response = compress_model.invoke(messages)
-        bar()
+        print("⏳ Compressing Research:")
+        with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+            response = compress_model.invoke(messages)
+            bar()
+        
+        # Format and display the compressed research
+        format_messages([response])
+
+        # Extract raw notes from tool and AI messages
+        raw_notes = [
+            str(m.content) for m in filter_messages(
+                state["researcher_messages"], 
+                include_types=["tool", "ai"]
+            )
+        ]
+
+        return {
+            "compressed_research": str(response.content),
+            "raw_notes": ["\n".join(raw_notes)]
+        }
     
-    # Format and display the compressed research
-    format_messages([response])
-
-    # Extract raw notes from tool and AI messages
-    raw_notes = [
-        str(m.content) for m in filter_messages(
-            state["researcher_messages"], 
-            include_types=["tool", "ai"]
-        )
-    ]
-
-    return {
-        "compressed_research": str(response.content),
-        "raw_notes": ["\n".join(raw_notes)]
-    }
+    except Exception as e:
+        # Get the traceback information
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
+        
+        # Print detailed error information
+        print(f"\n❌ Error in compress_research function:")
+        print(f"   Line number: {line_number}")
+        print(f"   Error type: {type(e).__name__}")
+        print(f"   Error message: {str(e)}")
+        print(f"\n   Full traceback:")
+        traceback.print_exc()
+        
+        # Re-raise the exception to let the caller handle it
+        raise
 
 # ===== ROUTING LOGIC =====
 
@@ -226,25 +279,43 @@ def should_continue(state: ResearcherState) -> Literal["tool_node", "compress_re
     Determines whether to continue with tool execution or compress research
     based on whether the LLM made tool calls.
     """
-    messages = state["researcher_messages"]
-    last_message = messages[-1]
+    
+    try:
+        messages = state["researcher_messages"]
+        last_message = messages[-1]
 
-    # Continue to tool execution if tools were called
-    if last_message.tool_calls:
-        # Create a System message to show the decision
-        decision_message = SystemMessage(
-            content="Last message contains tool calls. Continuing to tool execution..."
-        )
-        format_messages([decision_message])
-        return "tool_node"
-    # Otherwise, compress research findings
-    else:
-        # Create a System message to show the decision
-        decision_message = SystemMessage(
-            content="No tool calls found. Stopping research and compressing findings..."
-        )
-        format_messages([decision_message])
-        return "compress_research"
+        # Continue to tool execution if tools were called
+        if last_message.tool_calls:
+            # Create a System message to show the decision
+            decision_message = SystemMessage(
+                content="Last message contains tool calls. Continuing to tool execution..."
+            )
+            format_messages([decision_message])
+            return "tool_node"
+        # Otherwise, compress research findings
+        else:
+            # Create a System message to show the decision
+            decision_message = SystemMessage(
+                content="No tool calls found. Stopping research and compressing findings..."
+            )
+            format_messages([decision_message])
+            return "compress_research"
+    
+    except Exception as e:
+        # Get the traceback information
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        line_number = exc_tb.tb_lineno
+        
+        # Print detailed error information
+        print(f"\n❌ Error in should_continue function:")
+        print(f"   Line number: {line_number}")
+        print(f"   Error type: {type(e).__name__}")
+        print(f"   Error message: {str(e)}")
+        print(f"\n   Full traceback:")
+        traceback.print_exc()
+        
+        # Re-raise the exception to let the caller handle it
+        raise
 
 # ===== GRAPH CONSTRUCTION =====
 
