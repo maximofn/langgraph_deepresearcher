@@ -109,11 +109,8 @@ def think_tool(reflection: str = "") -> str:
 
     Args:
         reflection: (REQUIRED) Your detailed reflection on research progress, findings, gaps, and next steps.
-                   Must include:
-                   - Analysis of current findings: What concrete information have I gathered?
-                   - Gap assessment: What crucial information is still missing?
-                   - Quality evaluation: Do I have sufficient evidence/examples for a good answer?
-                   - Strategic decision: Should I continue searching or provide my answer?
+                   Your reflection should include analysis of current findings, gap assessment,
+                   quality evaluation, and strategic decision about next steps.
     """
     if not reflection:
         return "Reflection recorded: [No reflection provided]"
