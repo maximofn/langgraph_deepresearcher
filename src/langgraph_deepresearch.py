@@ -29,8 +29,8 @@ async def main():
     # Invoke the deep researcher agent
     # user_message = "Quiero investigar las mejores cafeterías de Madrid."
     print("¿Sobre qué quieres investigar?")
-    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
-    print("\033[16A", end="")  # Move cursor up 16 lines using ANSI escape code
+    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
+    print("\033[32A", end="")  # Move cursor up 32 lines using ANSI escape code
     user_message = input()
     result = await deep_researcher_agent.ainvoke({"messages": [HumanMessage(content=f"{user_message}.")]}, config=thread)
 
@@ -38,8 +38,8 @@ async def main():
     if result.get("research_brief", None) is None:
         # user_message = "Examina la calidad del café para evaluar las mejores cafeterías de Madrid."
         print("Introduce tu aclaración")
-        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
-        print("\033[16A", end="")  # Move cursor up 16 lines using ANSI escape code
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
+        print("\033[32A", end="")  # Move cursor up 32 lines using ANSI escape code
         user_message = input()
         result = await deep_researcher_agent.ainvoke({"messages": [HumanMessage(content=user_message)]}, config=thread)
     
