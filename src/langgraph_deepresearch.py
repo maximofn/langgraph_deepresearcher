@@ -28,13 +28,19 @@ async def main():
     
     # Invoke the deep researcher agent
     # user_message = "Quiero investigar las mejores cafeterías de Madrid."
-    user_message = input("¿Sobre qué quieres investigar?\n")
+    print("¿Sobre qué quieres investigar?")
+    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
+    print("\033[16A", end="")  # Move cursor up 16 lines using ANSI escape code
+    user_message = input()
     result = await deep_researcher_agent.ainvoke({"messages": [HumanMessage(content=f"{user_message}.")]}, config=thread)
 
     # If clarification was needed, provide additional context and continue
     if result.get("research_brief", None) is None:
         # user_message = "Examina la calidad del café para evaluar las mejores cafeterías de Madrid."
-        user_message = input("Introduce tu aclaración\n")
+        print("Introduce tu aclaración")
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", end="")  # Print line breaks for video recording
+        print("\033[16A", end="")  # Move cursor up 16 lines using ANSI escape code
+        user_message = input()
         result = await deep_researcher_agent.ainvoke({"messages": [HumanMessage(content=user_message)]}, config=thread)
     
     # Print the final report
