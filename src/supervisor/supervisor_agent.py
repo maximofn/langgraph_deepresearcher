@@ -143,11 +143,18 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
         else:
             format_messages([response], title="Supervisor Agent")
         
+        # Increment research iterations if conduct research tool call is present
+        research_iterations = state.get("research_iterations", 0)
+        if response.tool_calls is not None:
+            response_tool_calls_name = response.tool_calls[0].get('name')
+            if response_tool_calls_name == "ConductResearch":
+                research_iterations += 1
+        
         return Command(
             goto="supervisor_tools",
             update={
                 "supervisor_messages": [response],
-                "research_iterations": state.get("research_iterations", 0) + 1
+                "research_iterations": research_iterations
             }
         )
     
