@@ -132,7 +132,6 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
         
         # Format and display the supervisor messages
         if response.tool_calls is not None:
-            print(f"response.tool_calls: {response.tool_calls[0].get('name')}, type: {type(response.tool_calls[0].get('name'))}")
             response_tool_calls_name = response.tool_calls[0].get('name')
             if response_tool_calls_name == "think_tool":
                 title = "Supervisor Agent tools - Call to think tool"
@@ -213,7 +212,14 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
             system_message = SystemMessage(
                 content=f"Exceeded iterations or no tool calls or research complete. Ending supervisor... Research iterations: {research_iterations} and supervisor messages: {supervisor_messages}"
             )
-            format_messages([system_message], title="Supervisor Agent - Exceeded iterations or no tool calls or research complete")
+            termination_message_info = ""
+            if exceeded_iterations:
+                termination_message_info += f" Exceeded iterations"
+            if no_tool_calls:
+                termination_message_info += f" No tool calls"
+            if research_complete:
+                termination_message_info += f" Research complete"
+            format_messages([system_message], title=termination_message_info)
             should_end = True
             next_step = END
         

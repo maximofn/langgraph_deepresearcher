@@ -20,7 +20,6 @@ from utils.message_utils import format_messages
 from research.research_prompts import research_agent_prompt, compress_research_system_prompt, compress_research_human_message
 
 from LLM_models.LLM_models import RESEARCH_MODEL_NAME, RESEARCH_MODEL_PROVIDER, RESEARCH_MODEL_TEMPERATURE, RESEARCH_MODEL_BASE_URL, RESEARCH_MODEL_PROVIDER_API_KEY, RESEARCH_MODEL_MAX_TOKENS
-from LLM_models.LLM_models import SUMMARIZATION_MODEL_NAME, SUMMARIZATION_MODEL_PROVIDER, SUMMARIZATION_MODEL_TEMPERATURE, SUMMARIZATION_MODEL_BASE_URL, SUMMARIZATION_MODEL_PROVIDER_API_KEY
 from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, COMPRESS_MODEL_TEMPERATURE, COMPRESS_MODEL_BASE_URL, COMPRESS_MODEL_PROVIDER_API_KEY
 
 # ===== CONFIGURATION =====
@@ -30,18 +29,11 @@ tools = [tavily_search, think_tool]
 tools_by_name = {tool.name: tool for tool in tools}
 
 # Initialize models
-model = init_chat_model(
+research_model = init_chat_model(
     model=RESEARCH_MODEL_NAME,
     max_tokens=RESEARCH_MODEL_MAX_TOKENS
 )
-model_with_tools = model.bind_tools(tools)
-summarization_model = init_chat_model(
-    model=SUMMARIZATION_MODEL_NAME, 
-    model_provider=SUMMARIZATION_MODEL_PROVIDER, 
-    api_key=SUMMARIZATION_MODEL_PROVIDER_API_KEY,
-    base_url=SUMMARIZATION_MODEL_BASE_URL, 
-    temperature=SUMMARIZATION_MODEL_TEMPERATURE
-)
+research_model_with_tools = research_model.bind_tools(tools)
 compress_model = init_chat_model(
     model=COMPRESS_MODEL_NAME, 
     model_provider=COMPRESS_MODEL_PROVIDER, 
@@ -69,7 +61,7 @@ def llm_call(state: ResearcherState):
         if isinstance(state.get('researcher_messages', [])[-1], HumanMessage):
             format_messages([state.get("researcher_messages", [])[-1]], title="Researcher Agent - Simulated Human Message")
         with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
-            research_messages = model_with_tools.invoke(
+            research_messages = research_model_with_tools.invoke(
                 [SystemMessage(content=research_agent_prompt)] + state["researcher_messages"]
             )
             bar()  # Complete the progress bar

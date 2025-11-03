@@ -16,6 +16,7 @@ from langchain_core.tools import tool, InjectedToolArg
 from tavily import TavilyClient
 
 from research.research_prompts import summarize_webpage_prompt
+from LLM_models.LLM_models import SUMMARIZATION_MODEL_NAME, SUMMARIZATION_MODEL_PROVIDER, SUMMARIZATION_MODEL_TEMPERATURE, SUMMARIZATION_MODEL_BASE_URL, SUMMARIZATION_MODEL_PROVIDER_API_KEY
 
 from utils.today import get_today_str
 
@@ -52,6 +53,14 @@ class ResearcherOutputState(TypedDict):
     compressed_research: str
     raw_notes: Annotated[List[str], operator.add]
     researcher_messages: Annotated[Sequence[BaseMessage], add_messages]
+
+summarization_model = init_chat_model(
+    model=SUMMARIZATION_MODEL_NAME, 
+    model_provider=SUMMARIZATION_MODEL_PROVIDER, 
+    api_key=SUMMARIZATION_MODEL_PROVIDER_API_KEY,
+    base_url=SUMMARIZATION_MODEL_BASE_URL, 
+    temperature=SUMMARIZATION_MODEL_TEMPERATURE
+)
 
 # ===== STRUCTURED OUTPUT SCHEMAS =====
 
@@ -250,8 +259,3 @@ def format_search_output(summarized_results: dict) -> str:
         formatted_output += "-" * 80 + "\n"
     
     return formatted_output
-
-
-# ===== STRUCTURED OUTPUT OBJECTS =====
-
-summarization_model = init_chat_model(model="openai:gpt-4.1-mini")

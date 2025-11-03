@@ -35,7 +35,7 @@ from utils.message_utils import format_messages
 # ===== CONFIGURATION =====
 
 # Initialize model
-model = init_chat_model(
+scope_model = init_chat_model(
     model=SCOPE_MODEL_NAME, 
     model_provider=SCOPE_MODEL_PROVIDER, 
     api_key=SCOPE_MODEL_PROVIDER_API_KEY,
@@ -58,7 +58,7 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
         format_messages([state.get("messages", [])[-1]], title="Real Human Message", msg_subtype='RealHumanMessage')
 
         # Set up structured output model
-        structured_output_model = model.with_structured_output(ClarifyWithUser)
+        structured_output_model = scope_model.with_structured_output(ClarifyWithUser)
 
         # Invoke the model with clarification instructions
         with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
@@ -121,7 +121,7 @@ def write_research_brief(state: AgentState):
     
     try:
         # Set up structured output model
-        structured_output_model = model.with_structured_output(ResearchQuestion)
+        structured_output_model = scope_model.with_structured_output(ResearchQuestion)
 
         print("⏳ Scope agent - Write research brief:")
         format_messages([state.get("messages", [])[-1]], title="Scope Assistant - Write research brief")
