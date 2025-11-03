@@ -160,7 +160,7 @@ def format_message_content(message):
                 parts.append(item['text'])
             elif item.get('type') == 'tool_use':
                 parts.append(f"\n🔧 Tool Call: {item['name']}")
-                parts.append(f"   Args: {json.dumps(item['input'], indent=2)}")
+                parts.append(f"   Args: {str(json.dumps(item['input'], indent=7, ensure_ascii=False))}")
                 parts.append(f"   ID: {item.get('id', 'N/A')}")
                 tool_calls_processed = True
     else:
