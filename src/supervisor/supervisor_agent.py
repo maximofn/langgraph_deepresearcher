@@ -38,6 +38,7 @@ from research.research_agent import researcher_agent
 from research.research_state import think_tool
 
 from utils.today import get_today_str
+from utils.initialize_model import initialize_model
 
 from LLM_models.LLM_models import SUPERVISOR_MODEL_NAME, SUPERVISOR_MODEL_PROVIDER, SUPERVISOR_MODEL_TEMPERATURE, SUPERVISOR_MODEL_BASE_URL, SUPERVISOR_MODEL_PROVIDER_API_KEY, SUPERVISOR_MODEL_MAX_TOKENS
 
@@ -81,8 +82,12 @@ def get_notes_from_tool_calls(messages: list[BaseMessage]) -> list[str]:
 # ===== CONFIGURATION =====
 
 supervisor_tools = [ConductResearch, ResearchComplete, think_tool]
-supervisor_model = init_chat_model(
-    model=SUPERVISOR_MODEL_NAME,
+supervisor_model = initialize_model(
+    model_name=SUPERVISOR_MODEL_NAME,
+    model_provider=SUPERVISOR_MODEL_PROVIDER,
+    base_url=SUPERVISOR_MODEL_BASE_URL,
+    temperature=SUPERVISOR_MODEL_TEMPERATURE,
+    api_key=SUPERVISOR_MODEL_PROVIDER_API_KEY,
     max_tokens=SUPERVISOR_MODEL_MAX_TOKENS
 )
 supervisor_model_with_tools = supervisor_model.bind_tools(supervisor_tools)

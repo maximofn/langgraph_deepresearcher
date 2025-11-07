@@ -28,19 +28,21 @@ from scope.scope_prompts import clarify_with_user_instructions, transform_messag
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 
 from utils.today import get_today_str
-from LLM_models.LLM_models import SCOPE_MODEL_NAME, SCOPE_MODEL_PROVIDER, SCOPE_MODEL_TEMPERATURE, SCOPE_MODEL_BASE_URL, SCOPE_MODEL_PROVIDER_API_KEY
+from utils.initialize_model import initialize_model
+from LLM_models.LLM_models import SCOPE_MODEL_NAME, SCOPE_MODEL_PROVIDER, SCOPE_MODEL_TEMPERATURE, SCOPE_MODEL_BASE_URL, SCOPE_MODEL_PROVIDER_API_KEY, SCOPE_MODEL_MAX_TOKENS
 
 from utils.message_utils import format_messages
 
 # ===== CONFIGURATION =====
 
 # Initialize model
-scope_model = init_chat_model(
-    model=SCOPE_MODEL_NAME, 
-    model_provider=SCOPE_MODEL_PROVIDER, 
+scope_model = initialize_model(
+    model_name=SCOPE_MODEL_NAME,
+    model_provider=SCOPE_MODEL_PROVIDER,
+    base_url=SCOPE_MODEL_BASE_URL,
+    temperature=SCOPE_MODEL_TEMPERATURE,
     api_key=SCOPE_MODEL_PROVIDER_API_KEY,
-    base_url=SCOPE_MODEL_BASE_URL, 
-    temperature=SCOPE_MODEL_TEMPERATURE
+    max_tokens=SCOPE_MODEL_MAX_TOKENS
 )
 
 # ===== WORKFLOW NODES =====

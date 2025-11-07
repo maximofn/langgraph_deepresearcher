@@ -17,10 +17,11 @@ from langchain.chat_models import init_chat_model
 from research.research_state import ResearcherState, ResearcherOutputState, tavily_search, think_tool
 from utils.today import get_today_str
 from utils.message_utils import format_messages
+from utils.initialize_model import initialize_model
 from research.research_prompts import research_agent_prompt, compress_research_system_prompt, compress_research_human_message
 
 from LLM_models.LLM_models import RESEARCH_MODEL_NAME, RESEARCH_MODEL_PROVIDER, RESEARCH_MODEL_TEMPERATURE, RESEARCH_MODEL_BASE_URL, RESEARCH_MODEL_PROVIDER_API_KEY, RESEARCH_MODEL_MAX_TOKENS
-from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, COMPRESS_MODEL_TEMPERATURE, COMPRESS_MODEL_BASE_URL, COMPRESS_MODEL_PROVIDER_API_KEY
+from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, COMPRESS_MODEL_TEMPERATURE, COMPRESS_MODEL_BASE_URL, COMPRESS_MODEL_PROVIDER_API_KEY, COMPRESS_MODEL_MAX_TOKENS
 
 # ===== CONFIGURATION =====
 
@@ -29,18 +30,22 @@ tools = [tavily_search, think_tool]
 tools_by_name = {tool.name: tool for tool in tools}
 
 # Initialize models
-research_model = init_chat_model(
-    model=RESEARCH_MODEL_NAME,
+research_model = initialize_model(
+    model_name=RESEARCH_MODEL_NAME,
+    model_provider=RESEARCH_MODEL_PROVIDER,
+    base_url=RESEARCH_MODEL_BASE_URL,
+    temperature=RESEARCH_MODEL_TEMPERATURE,
+    api_key=RESEARCH_MODEL_PROVIDER_API_KEY,
     max_tokens=RESEARCH_MODEL_MAX_TOKENS
 )
 research_model_with_tools = research_model.bind_tools(tools)
-compress_model = init_chat_model(
-    model=COMPRESS_MODEL_NAME, 
+compress_model = initialize_model(
+    model_name=COMPRESS_MODEL_NAME, 
     model_provider=COMPRESS_MODEL_PROVIDER, 
-    api_key=COMPRESS_MODEL_PROVIDER_API_KEY,
     base_url=COMPRESS_MODEL_BASE_URL, 
     temperature=COMPRESS_MODEL_TEMPERATURE,
-    max_tokens=32000
+    api_key=COMPRESS_MODEL_PROVIDER_API_KEY,
+    max_tokens=COMPRESS_MODEL_MAX_TOKENS
 )
 
 # ===== AGENT NODES =====

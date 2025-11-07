@@ -16,6 +16,7 @@ from langchain.chat_models import init_chat_model
 from langgraph.graph import StateGraph, START, END
 
 from utils.today import get_today_str
+from utils.initialize_model import initialize_model
 from write.write_prompts import final_report_generation_prompt
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 from scope.scope_agent import clarify_with_user, write_research_brief
@@ -29,12 +30,12 @@ from utils.message_utils import format_messages
 
 # ===== Config =====
 
-writer_model = init_chat_model(
-    model=WRITER_MODEL_NAME,
+writer_model = initialize_model(
+    model_name=WRITER_MODEL_NAME,
     model_provider=WRITER_MODEL_PROVIDER,
-    api_key=WRITER_MODEL_PROVIDER_API_KEY,
     base_url=WRITER_MODEL_BASE_URL,
     temperature=WRITER_MODEL_TEMPERATURE,
+    api_key=WRITER_MODEL_PROVIDER_API_KEY,
     max_tokens=WRITER_MODEL_MAX_TOKENS
 )
 

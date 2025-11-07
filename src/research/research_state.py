@@ -16,9 +16,10 @@ from langchain_core.tools import tool, InjectedToolArg
 from tavily import TavilyClient
 
 from research.research_prompts import summarize_webpage_prompt
-from LLM_models.LLM_models import SUMMARIZATION_MODEL_NAME, SUMMARIZATION_MODEL_PROVIDER, SUMMARIZATION_MODEL_TEMPERATURE, SUMMARIZATION_MODEL_BASE_URL, SUMMARIZATION_MODEL_PROVIDER_API_KEY
+from LLM_models.LLM_models import SUMMARIZATION_MODEL_NAME, SUMMARIZATION_MODEL_PROVIDER, SUMMARIZATION_MODEL_TEMPERATURE, SUMMARIZATION_MODEL_BASE_URL, SUMMARIZATION_MODEL_PROVIDER_API_KEY, SUMMARIZATION_MODEL_MAX_TOKENS
 
 from utils.today import get_today_str
+from utils.initialize_model import initialize_model
 
 from dotenv import load_dotenv
 import os
@@ -54,12 +55,13 @@ class ResearcherOutputState(TypedDict):
     raw_notes: Annotated[List[str], operator.add]
     researcher_messages: Annotated[Sequence[BaseMessage], add_messages]
 
-summarization_model = init_chat_model(
-    model=SUMMARIZATION_MODEL_NAME, 
+summarization_model = initialize_model(
+    model_name=SUMMARIZATION_MODEL_NAME, 
     model_provider=SUMMARIZATION_MODEL_PROVIDER, 
-    api_key=SUMMARIZATION_MODEL_PROVIDER_API_KEY,
     base_url=SUMMARIZATION_MODEL_BASE_URL, 
-    temperature=SUMMARIZATION_MODEL_TEMPERATURE
+    temperature=SUMMARIZATION_MODEL_TEMPERATURE,
+    api_key=SUMMARIZATION_MODEL_PROVIDER_API_KEY,
+    max_tokens=SUMMARIZATION_MODEL_MAX_TOKENS
 )
 
 # ===== STRUCTURED OUTPUT SCHEMAS =====
