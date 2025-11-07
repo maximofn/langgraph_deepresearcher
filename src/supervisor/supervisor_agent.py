@@ -14,7 +14,6 @@ import traceback
 import sys
 
 from typing_extensions import Literal
-from alive_progress import alive_bar
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import (
@@ -39,6 +38,7 @@ from research.research_state import think_tool
 
 from utils.today import get_today_str
 from utils.initialize_model import initialize_model
+from utils.progress_bar import safe_progress_bar
 
 from LLM_models.LLM_models import SUPERVISOR_MODEL_NAME, SUPERVISOR_MODEL_PROVIDER, SUPERVISOR_MODEL_TEMPERATURE, SUPERVISOR_MODEL_BASE_URL, SUPERVISOR_MODEL_PROVIDER_API_KEY, SUPERVISOR_MODEL_MAX_TOKENS
 
@@ -131,7 +131,7 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
         
         # Make decision about next research steps
         print("⏳ Supervisor agent:")
-        with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+        with safe_progress_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
             response = await supervisor_model_with_tools.ainvoke(messages)
             bar()
         

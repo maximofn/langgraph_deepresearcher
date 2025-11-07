@@ -21,8 +21,7 @@ from write.write_prompts import final_report_generation_prompt
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 from scope.scope_agent import clarify_with_user, write_research_brief
 from supervisor.supervisor_agent import supervisor_agent
-
-from alive_progress import alive_bar
+from utils.progress_bar import safe_progress_bar
 
 from LLM_models.LLM_models import WRITER_MODEL_NAME, WRITER_MODEL_PROVIDER, WRITER_MODEL_TEMPERATURE, WRITER_MODEL_BASE_URL, WRITER_MODEL_PROVIDER_API_KEY, WRITER_MODEL_MAX_TOKENS
 
@@ -59,7 +58,7 @@ async def final_report_generation(state: AgentState):
     )
     
     print("⏳ Writer agent - Final report generation:")
-    with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+    with safe_progress_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
         final_report = await writer_model.ainvoke([HumanMessage(content=final_report_prompt)])
         bar()
 

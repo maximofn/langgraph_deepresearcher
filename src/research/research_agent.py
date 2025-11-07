@@ -6,7 +6,6 @@ and synthesis to answer complex research questions.
 """
 
 from typing_extensions import Literal
-from alive_progress import alive_bar
 import traceback
 import sys
 
@@ -18,6 +17,7 @@ from research.research_state import ResearcherState, ResearcherOutputState, tavi
 from utils.today import get_today_str
 from utils.message_utils import format_messages
 from utils.initialize_model import initialize_model
+from utils.progress_bar import safe_progress_bar
 from research.research_prompts import research_agent_prompt, compress_research_system_prompt, compress_research_human_message
 
 from LLM_models.LLM_models import RESEARCH_MODEL_NAME, RESEARCH_MODEL_PROVIDER, RESEARCH_MODEL_TEMPERATURE, RESEARCH_MODEL_BASE_URL, RESEARCH_MODEL_PROVIDER_API_KEY, RESEARCH_MODEL_MAX_TOKENS
@@ -65,7 +65,7 @@ def llm_call(state: ResearcherState):
         print("⏳ Researcher agent:")
         if isinstance(state.get('researcher_messages', [])[-1], HumanMessage):
             format_messages([state.get("researcher_messages", [])[-1]], title="Researcher Agent - Simulated Human Message")
-        with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+        with safe_progress_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
             research_messages = research_model_with_tools.invoke(
                 [SystemMessage(content=research_agent_prompt)] + state["researcher_messages"]
             )
@@ -117,11 +117,11 @@ def tool_node(state: ResearcherState):
         # Execute all tool calls
         observations = []
         for tool_call in tool_calls:
-            with alive_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
+            with safe_progress_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
                 tool = tools_by_name[tool_call["name"]]
                 observation = tool.invoke(tool_call["args"])
                 observations.append(observation)
-            bar()
+                bar()
             
             # Format and display the result immediately
             format_messages([ToolMessage(
@@ -170,7 +170,7 @@ def compress_research(state: ResearcherState) -> dict:
         messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
 
         print("⏳ Compressing Research:")
-        with alive_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
+        with safe_progress_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
             response = compress_model.invoke(messages)
             bar()
         
