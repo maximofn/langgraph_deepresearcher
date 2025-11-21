@@ -10,8 +10,13 @@ LangGraph Deep Researcher is a multi-agent research system that uses LangGraph t
 
 ### Running the Application
 ```bash
-# Run the main research workflow
+# Run the main research workflow (CLI)
 python src/langgraph_deepresearch.py
+
+# Run the Gradio web interface
+python run_gradio.py
+# Or with uv
+uv run python run_gradio.py
 
 # Run tests
 python test/test_agent_research.py
@@ -144,7 +149,45 @@ The project uses LangSmith for evaluation:
 - Evaluation scripts in `test/test_agent_*.py`
 - Creates datasets for testing agent decision-making (e.g., when to continue vs. stop research)
 
-## Documentation
+## User Interface
+
+### Gradio Web Interface
+
+The project includes a complete Gradio web interface for interactive research sessions. See [GRADIO_QUICKSTART.md](GRADIO_QUICKSTART.md) for quick start guide.
+
+**Location**: `front/` directory
+- `gradio_app.py` - Main Gradio interface
+- `deep_researcher_wrapper.py` - Wrapper for the research system
+- `event_tracker.py` - Event tracking system
+- `message_interceptor.py` - Message interception for real-time updates
+- `README.md` - Complete documentation
+- `TROUBLESHOOTING.md` - Troubleshooting guide
+
+**Key Features**:
+- Real-time streaming of agent outputs
+- Visual differentiation of components (🔵 Scope, 🟣 Supervisor, 🟢 Research, 🟠 Writer)
+- Intermediate outputs shown in italic format
+- Final report rendered in markdown
+- Automatic clarification handling
+
+**Architecture**:
+1. **Event Tracker**: Centralized event management system that captures all agent outputs
+2. **Message Interceptor**: Monkey-patches `format_messages()` to emit events without modifying core code
+3. **Wrapper**: Asynchronous wrapper that polls for events and streams them to Gradio
+4. **UI**: Gradio chat interface with custom formatting for each component type
+
+**IMPORTANT - Do NOT modify these patterns**:
+- The message interceptor captures events by patching `format_messages()` - this is intentional and should not be changed
+- User messages are added to chat history with initial "⏳ _Procesando..._" text to prevent duplication
+- Events of type `user_message` are filtered out in the UI to avoid showing the user's message twice
+- Events are separated with `---` for visual clarity
+- Polling interval is 0.3s with 1.0s final delay to ensure all events are captured
+- Event formatting uses emoji prefixes and italic for intermediate outputs
+
+**Running the Interface**:
+```bash
+python run_gradio.py  # Launches on http://localhost:7860
+```
 
 ### Gradio Documentation
 
@@ -171,6 +214,12 @@ The system uses `alive_bar` for visual feedback during LLM calls and tool execut
 ### Message Formatting
 Use `format_messages()` from [message_utils.py](src/utils/message_utils.py) for consistent console output with titles and message type indicators.
 
+**IMPORTANT**: The Gradio interface intercepts `format_messages()` calls to capture events in real-time. Do not remove or modify the message interception system in `front/message_interceptor.py` as it's essential for the web UI to function properly. The interceptor:
+- Patches `format_messages()` on initialization
+- Emits events to the tracker based on message titles
+- Maintains console output while also capturing for UI
+- Logs with `[INTERCEPTOR]` prefix for debugging
+
 ### Async Operations
 - Supervisor uses `asyncio.gather()` for parallel research agent execution
 - MCP agents require async throughout due to protocol requirements
@@ -183,3 +232,54 @@ Use `format_messages()` from [message_utils.py](src/utils/message_utils.py) for 
 - Thread configuration uses `{"configurable": {"thread_id": "1"}}` for conversation continuity
 - The supervisor enforces limits on concurrent researchers and total iterations to prevent runaway research
 - The system is fully async-compatible for MCP integration, using `asyncio.run(main())` as the entry point
+
+## Gradio Interface - Critical Implementation Details
+
+**DO NOT MODIFY** the following patterns without careful consideration:
+
+1. **Event Interception System** (`front/message_interceptor.py`)
+   - Monkey-patches `format_messages()` to capture all agent outputs
+   - Must be enabled on wrapper initialization: `enable_interception()`
+   - Events are emitted with logging: `[INTERCEPTOR] ✓ Event emitted: {type} - {title}`
+   - This is the ONLY way to capture real-time outputs without modifying core agent code
+
+2. **Chat History Management** (`front/gradio_app.py`)
+   - User messages are added with initial text: `(message, "⏳ _Procesando..._")`
+   - This prevents message duplication in the chat interface
+   - User message events (`type: "user_message"`) MUST be filtered in `process_message()`:
+     ```python
+     if event.get("type") == "user_message":
+         continue  # Critical: prevents duplication
+     ```
+
+3. **Event Polling** (`front/deep_researcher_wrapper.py`)
+   - Polling interval: 0.3s (balance between responsiveness and CPU usage)
+   - Final delay: 1.0s after task completion (ensures all events are captured)
+   - Do NOT reduce these delays as events may be lost
+
+4. **Event Formatting** (`front/gradio_app.py`)
+   - Intermediate outputs use italic: `_{content}_`
+   - Events separated with: `\n\n---\n\n`
+   - Emoji prefixes for component identification:
+     - 🔵 Scope Agent (azul)
+     - 🟣 Supervisor Agent (morado)
+     - 🟢 Research Agents (verde)
+     - 🟠 Writer Agent (naranja)
+     - ⚙️ Compression
+
+5. **Thread Safety** (`front/event_tracker.py`)
+   - Global tracker instance: `get_tracker()`
+   - Must be reset between sessions: `reset_tracker()`
+   - Events stored in list for sequential yielding
+
+**Common Pitfalls to Avoid**:
+- ❌ Don't remove the `user_message` filter - causes duplicate messages
+- ❌ Don't reduce polling delays below 0.3s - events will be missed
+- ❌ Don't remove the initial "Procesando..." text - chat bubbles will merge
+- ❌ Don't disable the interceptor - no events will be captured
+- ❌ Don't modify `format_messages()` signature - will break interception
+
+**Debugging**:
+- Check console for `[INTERCEPTOR]` logs to verify event capture
+- Use `front/TROUBLESHOOTING.md` for diagnostic procedures
+- Verify `✓ Message interception enabled` appears on startup
