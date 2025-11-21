@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alive-progress>=3.3.0",
+    "deepagents-cli>=0.0.8",
     "dotenv>=0.9.9",
+    "gradio>=5.49.1",
     "grandalf>=0.8",
     "ipykernel>=6.30.1",
     "langchain>=0.3.27",
