@@ -144,6 +144,19 @@ The project uses LangSmith for evaluation:
 - Evaluation scripts in `test/test_agent_*.py`
 - Creates datasets for testing agent decision-making (e.g., when to continue vs. stop research)
 
+## Documentation
+
+### Gradio Documentation
+
+All Gradio documentation has been converted to markdown and is available in the [gradio_documentation/](gradio_documentation/) directory. This includes comprehensive guides on:
+- Creating chatbots and interfaces
+- Working with agents and tool usage
+- Client-side and server-side functionality
+- Custom components and styling
+- Deployment and integration patterns
+
+Reference these files when implementing Gradio-based user interfaces for the research system.
+
 ## Important Patterns
 
 ### Error Handling
