@@ -52,13 +52,6 @@ class DeepResearcherWrapper:
             # Create thread
             thread = {"configurable": {"thread_id": "1"}}
 
-            # Yield initial user message
-            yield {
-                "type": "user_message",
-                "content": user_message,
-                "is_intermediate": False
-            }
-
             # Start research in the background
             import asyncio
 
@@ -81,11 +74,14 @@ class DeepResearcherWrapper:
                     yield self._event_to_dict(event)
                     yielded_count += 1
 
-                # Small delay to avoid busy waiting
-                await asyncio.sleep(0.1)
+                # Small delay to avoid busy waiting (increased for better event capture)
+                await asyncio.sleep(0.3)
 
             # Get the result
             result = await research_task
+
+            # Give time for any final events to be emitted
+            await asyncio.sleep(1.0)
 
             # Yield any remaining events
             all_events = self.tracker.get_events()
@@ -142,13 +138,6 @@ class DeepResearcherWrapper:
         try:
             thread = {"configurable": {"thread_id": "1"}}
 
-            # Yield user clarification
-            yield {
-                "type": "user_message",
-                "content": clarification,
-                "is_intermediate": False
-            }
-
             # Start research in the background
             import asyncio
 
@@ -171,11 +160,14 @@ class DeepResearcherWrapper:
                     yield self._event_to_dict(event)
                     yielded_count += 1
 
-                # Small delay to avoid busy waiting
-                await asyncio.sleep(0.1)
+                # Small delay to avoid busy waiting (increased for better event capture)
+                await asyncio.sleep(0.3)
 
             # Get the result
             result = await research_task
+
+            # Give time for any final events to be emitted
+            await asyncio.sleep(1.0)
 
             # Yield any remaining events
             all_events = self.tracker.get_events()

@@ -63,8 +63,8 @@ class DeepResearcherUI:
             yield history
             return
 
-        # Add user message to history
-        history = history + [(message, None)]
+        # Add user message to history with empty assistant response
+        history = history + [(message, "⏳ _Procesando..._")]
         yield history
 
         # Determine if this is initial research or clarification
@@ -73,10 +73,16 @@ class DeepResearcherUI:
             response_parts = []
 
             async for event in self.wrapper.continue_with_clarification(message):
-                response_parts.append(self._format_event(event))
+                # Skip user_message events since we already added the user message
+                if event.get("type") == "user_message":
+                    continue
 
-                # Update the assistant's response
-                history[-1] = (message, "\n\n".join(response_parts))
+                formatted_event = self._format_event(event)
+                if formatted_event:
+                    response_parts.append(formatted_event)
+
+                # Update the assistant's response (last tuple in history)
+                history[-1] = (message, "\n\n---\n\n".join(response_parts) if response_parts else "⏳ _Procesando..._")
                 yield history
 
             self.waiting_for_clarification = False
@@ -86,15 +92,20 @@ class DeepResearcherUI:
             response_parts = []
 
             async for event in self.wrapper.run_research(message):
-                event_html = self._format_event(event)
-                response_parts.append(event_html)
+                # Skip user_message events since we already added the user message
+                if event.get("type") == "user_message":
+                    continue
+
+                formatted_event = self._format_event(event)
+                if formatted_event:
+                    response_parts.append(formatted_event)
 
                 # Check if clarification is needed
                 if event.get("type") == "clarification":
                     self.waiting_for_clarification = True
 
-                # Update the assistant's response
-                history[-1] = (message, "\n\n".join(response_parts))
+                # Update the assistant's response (last tuple in history)
+                history[-1] = (message, "\n\n---\n\n".join(response_parts) if response_parts else "⏳ _Procesando..._")
                 yield history
 
     def _format_event(self, event: dict) -> str:

@@ -75,7 +75,7 @@ def _intercepting_format_messages(messages, title: str = "", border_style: str =
     # Extract message content
     content = _extract_message_content(messages)
 
-    # Emit event
+    # Emit event (always emit, even if event_type is None, for debugging)
     if event_type:
         tracker.emit(
             event_type=event_type,
@@ -83,6 +83,11 @@ def _intercepting_format_messages(messages, title: str = "", border_style: str =
             content=content,
             is_intermediate=is_intermediate
         )
+        print(f"[INTERCEPTOR] ✓ Event emitted: {event_type.value} - {title[:50] if len(title) > 50 else title}")
+    else:
+        # Still log for debugging
+        if title and msg_subtype != "RealHumanMessage":
+            print(f"[INTERCEPTOR] ⊘ Skipped event for title: {title}")
 
     # Call the original function to maintain console output
     if _original_format_messages:
