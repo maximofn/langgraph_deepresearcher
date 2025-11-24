@@ -25,13 +25,12 @@ def initialize_model(
     """
     
     # Anthropic models (Claude)
-    if "anthropic" in model_name.lower():
+    if "claude" in model_name.lower():
         model = init_chat_model(
             model=model_name,
             model_provider="anthropic",
             max_tokens=max_tokens,
-            temperature=temperature,
-            api_key=api_key
+            temperature=temperature
         )
     
     # Google Gemini models (using Google Generative AI, not Vertex AI)
