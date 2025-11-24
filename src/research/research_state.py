@@ -183,6 +183,16 @@ def summarize_webpage_content(webpage_content: str) -> str:
             ))
         ])
         
+        # Check if summary is valid (not None)
+        if summary is None:
+            print("Warning: Model returned None for structured output. Using fallback.")
+            return webpage_content[:1000] + "..." if len(webpage_content) > 1000 else webpage_content
+        
+        # Validate that summary has the required attributes
+        if not hasattr(summary, 'summary') or not hasattr(summary, 'key_excerpts'):
+            print("Warning: Summary object missing required attributes. Using fallback.")
+            return webpage_content[:1000] + "..." if len(webpage_content) > 1000 else webpage_content
+        
         # Format summary with clear structure
         formatted_summary = (
             f"<summary>\n{summary.summary}\n</summary>\n\n"
