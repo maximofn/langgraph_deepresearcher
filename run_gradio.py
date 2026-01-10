@@ -12,6 +12,11 @@ import os
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
+# CRITICAL: Enable interception BEFORE any agent modules are imported
+# This ensures that all format_messages() calls are intercepted
+from front.message_interceptor import enable_interception
+enable_interception()
+
 from front.gradio_app import create_interface
 
 
