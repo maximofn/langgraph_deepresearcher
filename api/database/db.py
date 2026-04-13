@@ -1,6 +1,7 @@
+from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from typing import AsyncGenerator
+from typing import AsyncGenerator, AsyncIterator
 
 from api.config import settings
 from api.database.models import Base
@@ -24,7 +25,17 @@ async def init_db():
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency for getting database session"""
+    """FastAPI dependency yielding an async DB session."""
+    async with async_session_maker() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+@asynccontextmanager
+async def db_session_context() -> AsyncIterator[AsyncSession]:
+    """Standalone async context manager for DB sessions (for background tasks)."""
     async with async_session_maker() as session:
         try:
             yield session

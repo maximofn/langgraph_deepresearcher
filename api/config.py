@@ -21,6 +21,16 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8000"]
 
+    # Observability
+    log_level: str = "INFO"
+    log_json: bool = False
+    enable_metrics: bool = True
+
+    # Rate limiting
+    enable_rate_limit: bool = True
+    rate_limit_create_session: str = "10/minute"
+    rate_limit_start_research: str = "10/minute"
+
     # LLM API Keys (loaded from .env)
     openai_api_key: Optional[str] = None
     anthropic_api_key: Optional[str] = None

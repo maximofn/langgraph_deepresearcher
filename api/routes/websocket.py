@@ -2,14 +2,16 @@
 WebSocket endpoint for real-time research updates.
 """
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import asyncio
+import logging
 
-from api.websockets.connection_manager import get_connection_manager
-from api.services.event_service import get_event_service
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
 from api.models.events import WebSocketMessage
+from api.services.event_service import get_event_service
+from api.websockets.connection_manager import get_connection_manager
 
-
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -66,24 +68,22 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                 await websocket.send_json(message.model_dump())
 
             except asyncio.TimeoutError:
-                # Timeout is normal, just check if connection is alive
+                # Timeout is normal; check the connection is alive via ping.
                 try:
                     await websocket.send_json({"type": "ping", "data": {}})
                 except Exception:
-                    # Connection is dead
+                    logger.info("WS connection closed during ping for %s", session_id)
                     break
 
     except WebSocketDisconnect:
-        print(f"[WS] Client disconnected from session {session_id}")
+        logger.info("Client disconnected from session %s", session_id)
 
     except Exception as e:
-        print(f"[WS] Error in WebSocket handler: {e}")
+        logger.exception("WebSocket handler error for session %s", session_id)
         try:
-            await websocket.send_json(
-                {"type": "error", "data": {"message": str(e)}}
-            )
+            await websocket.send_json({"type": "error", "data": {"message": str(e)}})
         except Exception:
-            pass
+            logger.warning("Failed to notify client of WS error", exc_info=True)
 
     finally:
         # Cleanup

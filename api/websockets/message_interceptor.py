@@ -1,196 +1,177 @@
 """
 Message interceptor for capturing agent outputs.
-Adapted from front/message_interceptor.py for WebSocket event emission.
+
+Installs a one-shot monkey-patch on ``src/utils/message_utils.format_messages``
+at application startup. The patch is aware of the currently active session via
+``contextvars`` so multiple concurrent research runs stay isolated.
 """
 
-from typing import Optional
-import sys
-import os
+from __future__ import annotations
+
 import asyncio
+import logging
+from contextlib import contextmanager
+from contextvars import ContextVar
+from typing import Callable, Iterator, Optional, Tuple
 
-from api.services.event_service import get_event_service
 from api.models.events import EventType
+from api.services.event_service import get_event_service
+from api.utils.paths import ensure_src_on_path
+
+logger = logging.getLogger(__name__)
+
+# Context-local current session — each asyncio task inherits its own copy, so
+# two concurrent research runs never step on each other.
+current_session_id: ContextVar[Optional[str]] = ContextVar(
+    "current_session_id", default=None
+)
+
+_original_format_messages: Optional[Callable] = None
+_installed: bool = False
 
 
-# Global state
-_original_format_messages: Optional[callable] = None
-_interception_enabled = False
-_current_session_id: Optional[str] = None
+def install_interceptor() -> None:
+    """Patch ``message_utils.format_messages`` once, at startup."""
+    global _original_format_messages, _installed
+
+    if _installed:
+        return
+
+    ensure_src_on_path()
+    try:
+        from utils import message_utils  # type: ignore[import-not-found]
+    except ImportError:
+        logger.exception("Interceptor install failed: cannot import utils.message_utils")
+        return
+
+    _original_format_messages = message_utils.format_messages
+    message_utils.format_messages = _intercepting_format_messages
+    _installed = True
+    logger.info("Message interceptor installed")
 
 
-def enable_interception(session_id: str):
-    """
-    Enable message interception for a specific session.
-    Must be called before agents are executed.
-    """
-    global _original_format_messages, _interception_enabled, _current_session_id
+def uninstall_interceptor() -> None:
+    """Restore the original function (useful for tests)."""
+    global _installed
 
-    if _interception_enabled and _current_session_id == session_id:
-        # Already enabled for this session
+    if not _installed or _original_format_messages is None:
         return
 
     try:
-        # Add src to path if not already
-        src_path = os.path.join(os.getcwd(), "src")
-        if src_path not in sys.path:
-            sys.path.insert(0, src_path)
+        from utils import message_utils  # type: ignore[import-not-found]
 
-        from utils import message_utils
-
-        # Store original and current session
-        if _original_format_messages is None:
-            _original_format_messages = message_utils.format_messages
-
-        _current_session_id = session_id
-
-        # Replace with intercepting version
-        message_utils.format_messages = _intercepting_format_messages
-
-        _interception_enabled = True
-        print(f"[INTERCEPTOR] Enabled for session {session_id}")
-
-    except ImportError as e:
-        print(f"[INTERCEPTOR] Failed to enable: {e}")
+        message_utils.format_messages = _original_format_messages
+        _installed = False
+        logger.info("Message interceptor uninstalled")
+    except ImportError:
+        logger.exception("Interceptor uninstall failed")
 
 
-def disable_interception():
-    """Disable interception and restore original function"""
-    global _original_format_messages, _interception_enabled, _current_session_id
-
-    if not _interception_enabled:
-        return
-
+@contextmanager
+def set_session_context(session_id: str) -> Iterator[None]:
+    """Bind ``session_id`` to the current async task for the duration of the block."""
+    token = current_session_id.set(session_id)
     try:
-        from utils import message_utils
-
-        if _original_format_messages:
-            message_utils.format_messages = _original_format_messages
-
-        _interception_enabled = False
-        _current_session_id = None
-        print("[INTERCEPTOR] Disabled")
-
-    except ImportError as e:
-        print(f"[INTERCEPTOR] Failed to disable: {e}")
+        yield
+    finally:
+        current_session_id.reset(token)
 
 
 def _intercepting_format_messages(
     messages, title: str = "", border_style: str = "white", msg_subtype: str = ""
 ):
-    """
-    Intercepting version that emits events to WebSocket.
-    This function replaces the original format_messages().
-    """
-    event_service = get_event_service()
+    """Replacement for ``format_messages`` that emits events then delegates."""
+    session_id = current_session_id.get()
 
-    # Determine event type
-    event_type, is_intermediate = _determine_event_type(title, msg_subtype)
+    if session_id is not None:
+        event_type, is_intermediate = _determine_event_type(title, msg_subtype)
+        if event_type is not None:
+            content = _extract_message_content(messages)
+            _schedule_emit(session_id, event_type, title or "System Message", content, is_intermediate)
 
-    # Extract content
-    content = _extract_message_content(messages)
-
-    # Emit event if we have a session ID
-    if event_type and _current_session_id:
-        # Schedule async emit in event loop
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                asyncio.create_task(
-                    event_service.emit(
-                        session_id=_current_session_id,
-                        event_type=event_type,
-                        title=title or "System Message",
-                        content=content,
-                        is_intermediate=is_intermediate,
-                    )
-                )
-            else:
-                # If loop is not running, run it synchronously
-                loop.run_until_complete(
-                    event_service.emit(
-                        session_id=_current_session_id,
-                        event_type=event_type,
-                        title=title or "System Message",
-                        content=content,
-                        is_intermediate=is_intermediate,
-                    )
-                )
-        except Exception as e:
-            print(f"[INTERCEPTOR] Error emitting event: {e}")
-
-    # Call original to maintain console output
-    if _original_format_messages:
+    if _original_format_messages is not None:
         _original_format_messages(messages, title, border_style, msg_subtype)
 
 
-def _determine_event_type(title: str, msg_subtype: str) -> tuple[Optional[EventType], bool]:
-    """
-    Determine event type from title and msg_subtype.
-    Returns (EventType, is_intermediate)
-    """
+def _schedule_emit(
+    session_id: str,
+    event_type: EventType,
+    title: str,
+    content: str,
+    is_intermediate: bool,
+) -> None:
+    event_service = get_event_service()
+    coro = event_service.emit(
+        session_id=session_id,
+        event_type=event_type,
+        title=title,
+        content=content,
+        is_intermediate=is_intermediate,
+    )
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop — we're being called from sync code outside an event loop.
+        # Fire-and-forget via a fresh loop.
+        try:
+            asyncio.run(coro)
+        except Exception:
+            logger.exception("Failed to emit event synchronously")
+        return
+
+    loop.create_task(coro)
+
+
+def _determine_event_type(title: str, msg_subtype: str) -> Tuple[Optional[EventType], bool]:
+    """Map a format_messages title/subtype to an EventType + intermediate flag."""
     title_lower = title.lower()
 
-    # Skip real human messages to avoid duplication
     if msg_subtype == "RealHumanMessage":
         return (None, True)
 
-    # Scope Agent events
     if "scope" in title_lower:
         if "clarification" in title_lower:
             return (EventType.SCOPE_CLARIFICATION, False)
-        elif "research brief" in title_lower or "brief generated" in title_lower:
+        if "research brief" in title_lower or "brief generated" in title_lower:
             return (EventType.SCOPE_BRIEF, False)
-        else:
-            return (EventType.SCOPE_START, True)
+        return (EventType.SCOPE_START, True)
 
-    # Supervisor Agent events
     if "supervisor" in title_lower:
         if "think" in title_lower or "planning" in title_lower:
             return (EventType.SUPERVISOR_THINKING, True)
-        elif "delegation" in title_lower or "delegat" in title_lower:
+        if "delegat" in title_lower:
             return (EventType.SUPERVISOR_DELEGATION, True)
-        else:
-            return (EventType.SUPERVISOR_START, True)
+        return (EventType.SUPERVISOR_START, True)
 
-    # Research Agent events
     if "research" in title_lower:
         if "tool call" in title_lower or "search" in title_lower:
             return (EventType.RESEARCH_TOOL_CALL, True)
-        elif "tool output" in title_lower or "result" in title_lower:
+        if "tool output" in title_lower or "result" in title_lower:
             return (EventType.RESEARCH_TOOL_OUTPUT, True)
-        elif "complete" in title_lower or "compress" in title_lower:
+        if "complete" in title_lower or "compress" in title_lower:
             return (EventType.RESEARCH_COMPLETE, False)
-        else:
-            return (EventType.RESEARCH_START, True)
+        return (EventType.RESEARCH_START, True)
 
-    # Compression
     if "compress" in title_lower or "synthesis" in title_lower:
         return (EventType.COMPRESSION, True)
 
-    # Writer Agent events
     if "writer" in title_lower or "report" in title_lower:
         if "complete" in title_lower or "final" in title_lower:
             return (EventType.WRITER_COMPLETE, False)
-        else:
-            return (EventType.WRITER_START, True)
+        return (EventType.WRITER_START, True)
 
-    # Final report
     if "final report" in title_lower:
         return (EventType.FINAL_REPORT, False)
 
-    # User message
     if "human" in title_lower:
         return (EventType.USER_MESSAGE, False)
 
-    # Default: treat as intermediate event
     return (None, True)
 
 
 def _extract_message_content(messages) -> str:
-    """
-    Extract content from messages.
-    Simplified version that handles common message formats.
-    """
+    """Best-effort extraction of human-readable content from a messages payload."""
     if isinstance(messages, str):
         return messages
 
@@ -198,20 +179,18 @@ def _extract_message_content(messages) -> str:
         parts = []
         for msg in messages:
             if hasattr(msg, "content"):
-                if isinstance(msg.content, str):
-                    parts.append(msg.content)
-                elif isinstance(msg.content, list):
-                    # Handle complex content (Anthropic format)
-                    for item in msg.content:
+                content = msg.content
+                if isinstance(content, str):
+                    parts.append(content)
+                elif isinstance(content, list):
+                    for item in content:
                         if isinstance(item, dict):
                             if item.get("type") == "text":
                                 parts.append(item.get("text", ""))
                             elif item.get("type") == "tool_use":
-                                parts.append(
-                                    f"Tool Call: {item.get('name', 'unknown')}"
-                                )
+                                parts.append(f"Tool Call: {item.get('name', 'unknown')}")
                 else:
-                    parts.append(str(msg.content))
+                    parts.append(str(content))
             elif isinstance(msg, dict):
                 parts.append(str(msg.get("content", msg)))
             else:
