@@ -21,4 +21,4 @@ src/langgraph_deepresearcher.egg-info
 .vscode/launch.json
 
 # Database
-deepresearcher.db
+*.db*
