@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    image: deepresearcher-api:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
