@@ -63,13 +63,9 @@ export function SessionPage() {
     [id, appendEvent]
   );
 
-  const enabled =
-    !!session &&
-    (session.status === 'active' ||
-      session.status === 'created' ||
-      session.status === 'clarification_needed');
-
-  useWebSocket({ sessionId: enabled ? id || null : null, onEvent: handleEvent });
+  // Always connect: the backend replays the full event history on connect,
+  // so completed sessions also need a WS to load their timeline.
+  useWebSocket({ sessionId: session ? id || null : null, onEvent: handleEvent });
 
   if (error) {
     return <div className="p-10 text-center text-neutral-400">{error}</div>;
