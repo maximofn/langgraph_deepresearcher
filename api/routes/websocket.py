@@ -46,11 +46,43 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             {"type": "connected", "data": {"session_id": session_id}}
         )
 
+        # Replay any events already persisted for this session so late joiners
+        # (new tab, page reload, API restart) see the full timeline — not only
+        # what arrives after connection.
+        history = await event_service.get_session_events(session_id)
+        last_replayed_ts = 0.0
+        for event in history:
+            last_replayed_ts = max(last_replayed_ts, event.timestamp or 0.0)
+            await websocket.send_json(
+                WebSocketMessage(
+                    type="event",
+                    data={
+                        "event_type": event.event_type,
+                        "session_id": event.session_id,
+                        "title": event.title,
+                        "content": event.content,
+                        "is_intermediate": event.is_intermediate,
+                        "timestamp": event.timestamp,
+                        "metadata": event.metadata,
+                        "message_type": event.message_type,
+                        "message_subtype": event.message_subtype,
+                        "agent": event.agent,
+                        "tool_name": event.tool_name,
+                        "tool_args": event.tool_args,
+                        "tool_call_id": event.tool_call_id,
+                    },
+                ).model_dump()
+            )
+
         # Listen for events and forward to WebSocket
         while True:
             try:
                 # Wait for next event (with timeout to check connection)
                 event = await asyncio.wait_for(event_queue.get(), timeout=1.0)
+
+                # Skip events already delivered via the replay snapshot.
+                if (event.timestamp or 0.0) <= last_replayed_ts:
+                    continue
 
                 # Convert event to WebSocket message
                 message = WebSocketMessage(

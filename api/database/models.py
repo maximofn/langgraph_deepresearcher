@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime, Enum as SQLEnum, Boolean, Integer
+from sqlalchemy import Column, String, Text, DateTime, Enum as SQLEnum, Boolean, Integer, JSON, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 import enum
@@ -69,3 +69,15 @@ class ResearchEvent(Base):
     content = Column(Text, nullable=False)
     is_intermediate = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Timestamp emitted by the interceptor (Unix seconds), for ordering.
+    timestamp = Column(Float, nullable=True)
+
+    # Per-message metadata (mirrors api/models/events.Event)
+    message_type = Column(String(32), nullable=True)
+    message_subtype = Column(String(64), nullable=True)
+    agent = Column(String(32), nullable=True)
+    tool_name = Column(String(128), nullable=True)
+    tool_args = Column(JSON, nullable=True)
+    tool_call_id = Column(String(128), nullable=True)
+    metadata_json = Column(JSON, nullable=True)
