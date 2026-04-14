@@ -15,12 +15,25 @@ interface ChatViewProps {
 
 export function ChatView({ session, events }: ChatViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
   const upsertSession = useSessionStore((s) => s.upsertSession);
   const setActive = useSessionStore((s) => s.setActiveSession);
 
   useEffect(() => {
+    stickToBottomRef.current = true;
+  }, [session.id]);
+
+  useEffect(() => {
+    if (!stickToBottomRef.current) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [events.length, session.status, session.final_report]);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottomRef.current = distanceFromBottom < 40;
+  };
 
   const handleClarify = async (clarification: string) => {
     await api.clarify(session.id, clarification);
@@ -44,7 +57,11 @@ export function ChatView({ session, events }: ChatViewProps) {
         </div>
       </header>
 
-      <div ref={scrollRef} className="scrollbar-thin flex-1 overflow-y-auto px-6 py-4">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="scrollbar-thin flex-1 overflow-y-auto px-6 py-4"
+      >
         {events.length === 0 && session.status === 'created' && (
           <div className="mt-20 text-center text-sm text-neutral-500">
             Waiting for research to start…
