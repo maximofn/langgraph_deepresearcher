@@ -17,10 +17,26 @@ export default {
         toolcall: '#C026D3', // magenta
         tooloutput: '#EAB308', // yellow
         system: '#EF4444', // red
+        terminal: {
+          bg: '#0A0A0A',
+          surface: '#141414',
+          surfaceAlt: '#0F0F0F',
+          border: '#1E1E1E',
+          borderInput: '#1A1A1A',
+          text: '#FFFFFF',
+          textPrimary: '#CCCCCC',
+          textSecondary: '#DDDDDD',
+          muted: '#666666',
+          mutedAlt: '#555555',
+          tertiary: '#444444',
+          accent: '#00FF00',
+          running: '#FFB800',
+          clarify: '#FF6B00',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        sans: ['Geist', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
       },
     },
   },

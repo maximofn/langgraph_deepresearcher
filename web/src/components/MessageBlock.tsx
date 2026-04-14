@@ -103,7 +103,10 @@ export function BlockShell({
         )}
         <button
           type="button"
-          onClick={() => setCollapsed((c) => !c)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setCollapsed((c) => !c);
+          }}
           aria-label={collapsed ? 'Expand block' : 'Collapse block'}
           className="text-[#444444] transition-colors hover:text-[#AAAAAA]"
         >

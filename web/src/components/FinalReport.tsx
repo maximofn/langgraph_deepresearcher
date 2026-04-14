@@ -39,10 +39,19 @@ export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportPr
   };
 
   return (
-    <div className="mt-2 pt-2">
+    <div
+      className={`mt-2 pt-2 ${collapsed ? 'cursor-pointer' : ''}`}
+      onClick={collapsed ? () => setCollapsed(false) : undefined}
+      role={collapsed ? 'button' : undefined}
+    >
       <div className="h-px w-full bg-[#1E1E1E]" />
 
-      <div className="flex items-center justify-between gap-4 pb-3 pt-4">
+      <div
+        className={`flex items-center justify-between gap-4 pb-3 pt-4 ${
+          collapsed ? '' : 'cursor-pointer'
+        }`}
+        onClick={!collapsed ? () => setCollapsed(true) : undefined}
+      >
         <div className="flex items-center gap-2.5">
           <FileText size={18} className="text-white" />
           <span className="font-sans text-[16px] font-semibold text-white">
@@ -50,7 +59,10 @@ export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportPr
           </span>
           <button
             type="button"
-            onClick={() => setCollapsed((c) => !c)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setCollapsed((c) => !c);
+            }}
             aria-label={collapsed ? 'Expand report' : 'Collapse report'}
             className="ml-1 text-[#444444] transition-colors hover:text-[#AAAAAA]"
           >
@@ -70,7 +82,10 @@ export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportPr
             </div>
           )}
           <button
-            onClick={handleDownload}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDownload();
+            }}
             className="flex items-center gap-1.5 rounded-[8px] bg-[#00FF00] px-3.5 py-2 font-sans text-[12px] font-semibold text-black transition-[filter] hover:brightness-110"
           >
             <Download size={14} /> Download .md
