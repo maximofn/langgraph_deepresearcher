@@ -52,3 +52,36 @@ async def test_validation_error_returns_structured_code(app_client):
     assert resp.status_code == 422
     body = resp.json()
     assert body["code"] == "validation_error"
+
+
+@pytest.mark.asyncio
+async def test_delete_session_cascades(app_client):
+    from api.database.db import db_session_context
+    from api.services.session_service import SessionService
+
+    created = await app_client.post("/sessions/", json={"query": "to-delete"})
+    sid = created.json()["session"]["id"]
+
+    # Seed a message so we can verify cascade
+    async with db_session_context() as db:
+        await SessionService(db).add_message(sid, "user", "hello")
+
+    resp = await app_client.delete(f"/sessions/{sid}")
+    assert resp.status_code == 204
+
+    # Second GET must 404
+    get_resp = await app_client.get(f"/sessions/{sid}")
+    assert get_resp.status_code == 404
+    assert get_resp.json()["code"] == "session_not_found"
+
+    # Messages are gone too
+    async with db_session_context() as db:
+        msgs = await SessionService(db).get_session_messages(sid)
+        assert msgs == []
+
+
+@pytest.mark.asyncio
+async def test_delete_session_not_found(app_client):
+    resp = await app_client.delete("/sessions/does-not-exist")
+    assert resp.status_code == 404
+    assert resp.json()["code"] == "session_not_found"
