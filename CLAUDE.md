@@ -13,10 +13,7 @@ LangGraph Deep Researcher is a multi-agent research system that uses LangGraph t
 # Run the main research workflow (CLI)
 python src/langgraph_deepresearch.py
 
-# Run the Gradio web interface (legacy)
-python run_gradio.py
-
-# Run the FastAPI backend + React web UI (recommended)
+# Run the FastAPI backend + React web UI
 docker compose up --build -d           # API on http://localhost:8000
 cd web && npm install && npm run dev    # Web UI on http://localhost:5173
 
@@ -166,7 +163,7 @@ REST + WebSocket API that wraps the research graph with persistence and streamin
 - `api/services/session_service.py` — session/thread lifecycle and persistence
 - `api/services/event_service.py` — stores and replays research events
 - `api/websockets/connection_manager.py` — per-session WS broadcast
-- `api/websockets/message_interceptor.py` — patches `format_messages()` to emit events to subscribed WS clients (same pattern as the Gradio interceptor)
+- `api/websockets/message_interceptor.py` — patches `format_messages()` to emit events to subscribed WS clients
 - `api/database/` — SQLite models and migrations for sessions, messages, events
 - `api/models/` — Pydantic request/response/event schemas
 
@@ -196,55 +193,6 @@ npm run dev        # http://localhost:5173
 **IMPORTANT — zustand selector gotcha**:
 When returning a fallback collection from a store selector, use a **stable reference** declared outside the component (e.g. `const EMPTY_EVENTS: ResearchEvent[] = []`) — never inline `|| []`. Inline literals create a new array each render, which `useSyncExternalStore` detects as a state change, causing `Maximum update depth exceeded`. See `web/src/pages/SessionPage.tsx`.
 
-### Gradio Web Interface (legacy)
-
-The project includes a complete Gradio web interface for interactive research sessions. See [GRADIO_QUICKSTART.md](GRADIO_QUICKSTART.md) for quick start guide.
-
-**Location**: `front/` directory
-- `gradio_app.py` - Main Gradio interface
-- `deep_researcher_wrapper.py` - Wrapper for the research system
-- `event_tracker.py` - Event tracking system
-- `message_interceptor.py` - Message interception for real-time updates
-- `README.md` - Complete documentation
-- `TROUBLESHOOTING.md` - Troubleshooting guide
-
-**Key Features**:
-- Real-time streaming of agent outputs
-- Visual differentiation of components (🔵 Scope, 🟣 Supervisor, 🟢 Research, 🟠 Writer)
-- Intermediate outputs shown in italic format
-- Final report rendered in markdown
-- Automatic clarification handling
-
-**Architecture**:
-1. **Event Tracker**: Centralized event management system that captures all agent outputs
-2. **Message Interceptor**: Monkey-patches `format_messages()` to emit events without modifying core code
-3. **Wrapper**: Asynchronous wrapper that polls for events and streams them to Gradio
-4. **UI**: Gradio chat interface with custom formatting for each component type
-
-**IMPORTANT - Do NOT modify these patterns**:
-- The message interceptor captures events by patching `format_messages()` - this is intentional and should not be changed
-- User messages are added to chat history with initial "⏳ _Procesando..._" text to prevent duplication
-- Events of type `user_message` are filtered out in the UI to avoid showing the user's message twice
-- Events are separated with `---` for visual clarity
-- Polling interval is 0.3s with 1.0s final delay to ensure all events are captured
-- Event formatting uses emoji prefixes and italic for intermediate outputs
-
-**Running the Interface**:
-```bash
-python run_gradio.py  # Launches on http://localhost:7860
-```
-
-### Gradio Documentation
-
-All Gradio documentation has been converted to markdown and is available in the [gradio_documentation/](gradio_documentation/) directory. This includes comprehensive guides on:
-- Creating chatbots and interfaces
-- Working with agents and tool usage
-- Client-side and server-side functionality
-- Custom components and styling
-- Deployment and integration patterns
-
-Reference these files when implementing Gradio-based user interfaces for the research system.
-
 ## Important Patterns
 
 ### Error Handling
@@ -259,9 +207,9 @@ The system uses `alive_bar` for visual feedback during LLM calls and tool execut
 ### Message Formatting
 Use `format_messages()` from [message_utils.py](src/utils/message_utils.py) for consistent console output with titles and message type indicators.
 
-**IMPORTANT**: The Gradio interface intercepts `format_messages()` calls to capture events in real-time. Do not remove or modify the message interception system in `front/message_interceptor.py` as it's essential for the web UI to function properly. The interceptor:
+**IMPORTANT**: The FastAPI WebSocket layer intercepts `format_messages()` calls to capture events in real-time. Do not remove or modify `api/websockets/message_interceptor.py` — it's essential for streaming events to the web UI. The interceptor:
 - Patches `format_messages()` on initialization
-- Emits events to the tracker based on message titles
+- Emits events to subscribed WS clients based on message titles
 - Maintains console output while also capturing for UI
 - Logs with `[INTERCEPTOR]` prefix for debugging
 

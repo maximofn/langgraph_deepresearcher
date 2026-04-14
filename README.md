@@ -15,9 +15,7 @@ Model assignments live in `src/LLM_models/LLM_models.py`.
 
 ## Interfaces
 
-Three ways to run the researcher:
-
-### 1. CLI
+### CLI
 
 ```bash
 uv sync
@@ -25,7 +23,7 @@ source .venv/bin/activate
 python src/langgraph_deepresearch.py
 ```
 
-### 2. FastAPI + React web UI (recommended)
+### FastAPI + React web UI
 
 Full-featured UI with session history, real-time streaming over WebSockets, clarification flow and persisted reports.
 
@@ -41,12 +39,6 @@ npm run dev                           # UI on http://localhost:5173
 
 - Backend: `api/` (FastAPI, SQLite persistence, WebSocket events, optional Prometheus metrics)
 - Frontend: `web/` (React 18, TypeScript, TailwindCSS, zustand, react-router)
-
-### 3. Gradio (legacy)
-
-```bash
-python run_gradio.py                  # http://localhost:7860
-```
 
 ## Environment
 
