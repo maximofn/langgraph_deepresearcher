@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  body {
+    @apply bg-neutral-950 text-neutral-100;
+  }
+}
+
+@layer components {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #404040 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #404040;
+    border-radius: 4px;
+  }
+}
+
+.markdown-body h1 {
+  @apply text-2xl font-bold mt-6 mb-3;
+}
+.markdown-body h2 {
+  @apply text-xl font-semibold mt-5 mb-2;
+}
+.markdown-body h3 {
+  @apply text-lg font-semibold mt-4 mb-2;
+}
+.markdown-body p {
+  @apply my-2 leading-relaxed;
+}
+.markdown-body ul {
+  @apply list-disc ml-6 my-2;
+}
+.markdown-body ol {
+  @apply list-decimal ml-6 my-2;
+}
+.markdown-body code {
+  @apply font-mono text-sm bg-neutral-800 px-1 py-0.5 rounded;
+}
+.markdown-body pre {
+  @apply bg-neutral-900 p-3 rounded my-3 overflow-x-auto;
+}
+.markdown-body pre code {
+  @apply bg-transparent p-0;
+}
+.markdown-body a {
+  @apply text-sky-400 hover:underline;
+}
+.markdown-body blockquote {
+  @apply border-l-4 border-neutral-600 pl-4 italic my-3 text-neutral-300;
+}
+.markdown-body hr {
+  @apply my-6 border-neutral-700;
+}
+.markdown-body table {
+  @apply w-full my-3 border-collapse;
+}
+.markdown-body th, .markdown-body td {
+  @apply border border-neutral-700 px-2 py-1;
+}
+.markdown-body th {
+  @apply bg-neutral-800 font-semibold;
+}
