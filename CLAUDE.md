@@ -13,14 +13,17 @@ LangGraph Deep Researcher is a multi-agent research system that uses LangGraph t
 # Run the main research workflow (CLI)
 python src/langgraph_deepresearch.py
 
-# Run the Gradio web interface
+# Run the Gradio web interface (legacy)
 python run_gradio.py
-# Or with uv
-uv run python run_gradio.py
+
+# Run the FastAPI backend + React web UI (recommended)
+docker compose up --build -d           # API on http://localhost:8000
+cd web && npm install && npm run dev    # Web UI on http://localhost:5173
 
 # Run tests
 python test/test_agent_research.py
 python test/test_agent_scope.py
+pytest test/api/                        # API tests
 ```
 
 ### Environment Setup
@@ -151,7 +154,49 @@ The project uses LangSmith for evaluation:
 
 ## User Interface
 
-### Gradio Web Interface
+### FastAPI Backend (`api/`)
+
+REST + WebSocket API that wraps the research graph with persistence and streaming.
+
+**Structure**:
+- `api/main.py` — FastAPI app, CORS, optional rate limiting via `slowapi`, optional Prometheus metrics
+- `api/config.py` — settings (host/port, CORS, rate limit toggles, DB path)
+- `api/routes/sessions.py` — session CRUD + `start` / `clarify` endpoints
+- `api/routes/websocket.py` — `/ws/sessions/{id}` channel for real-time events
+- `api/services/session_service.py` — session/thread lifecycle and persistence
+- `api/services/event_service.py` — stores and replays research events
+- `api/websockets/connection_manager.py` — per-session WS broadcast
+- `api/websockets/message_interceptor.py` — patches `format_messages()` to emit events to subscribed WS clients (same pattern as the Gradio interceptor)
+- `api/database/` — SQLite models and migrations for sessions, messages, events
+- `api/models/` — Pydantic request/response/event schemas
+
+**Rate limiting**: opt-in via decorators on mutation endpoints. Do **not** re-add `default_limits` to the `Limiter` in `api/main.py` — it would throttle polling GETs used by the web UI and cause "failed to load sessions" errors.
+
+**Docker**: `docker-compose.yml` builds the API image (`deepresearcher-api:latest`) and mounts `./data` for SQLite persistence. Code is baked into the image, so changes to `api/` require `docker compose up --build -d api` to take effect.
+
+### React Web UI (`web/`)
+
+Vite + React 18 + TypeScript + TailwindCSS + zustand + react-router.
+
+**Structure**:
+- `web/src/App.tsx` — routes and session list polling
+- `web/src/pages/HomePage.tsx`, `SessionPage.tsx`
+- `web/src/components/` — `Sidebar`, `ChatView`, `EventRenderer`, `MessageBlock`, `FinalReport`, `ClarifyInput`, `SettingsModal`, `StatusBadge`
+- `web/src/state/sessionStore.ts` — zustand store for sessions and events
+- `web/src/api/client.ts` — typed REST client (uses Vite proxy to `localhost:8000`)
+- `web/src/api/websocket.ts` — WebSocket hook for streaming events
+- `web/vite.config.ts` — dev server proxies `/sessions`, `/health`, `/ws` to the API
+
+**Running**:
+```bash
+cd web && npm install
+npm run dev        # http://localhost:5173
+```
+
+**IMPORTANT — zustand selector gotcha**:
+When returning a fallback collection from a store selector, use a **stable reference** declared outside the component (e.g. `const EMPTY_EVENTS: ResearchEvent[] = []`) — never inline `|| []`. Inline literals create a new array each render, which `useSyncExternalStore` detects as a state change, causing `Maximum update depth exceeded`. See `web/src/pages/SessionPage.tsx`.
+
+### Gradio Web Interface (legacy)
 
 The project includes a complete Gradio web interface for interactive research sessions. See [GRADIO_QUICKSTART.md](GRADIO_QUICKSTART.md) for quick start guide.
 
