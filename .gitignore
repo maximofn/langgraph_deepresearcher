@@ -22,3 +22,8 @@ src/langgraph_deepresearcher.egg-info
 
 # Database
 *.db*
+
+# Web
+web/node_modules/
+web/dist/
+web/.vite/
