@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
+
 from pydantic import BaseModel
 
 
@@ -40,8 +41,36 @@ class EventType(str, Enum):
     USER_MESSAGE = "user_message"
 
 
+class MessageKind(str, Enum):
+    """Python class of the underlying LangChain message, as detected by the interceptor."""
+
+    HUMAN = "Human"
+    AI = "AI"
+    TOOL = "Tool"  # tool output (ToolMessage)
+    TOOL_CALL = "ToolCall"  # tool call dict { name, args, id }
+    CLARIFY = "ClarifyWithUser"
+    RESEARCH_QUESTION = "ResearchQuestion"
+    SYSTEM = "System"
+    OTHER = "Other"
+
+
+class AgentName(str, Enum):
+    """Which agent produced the message."""
+
+    SCOPE = "scope"
+    SUPERVISOR = "supervisor"
+    RESEARCH = "research"
+    WRITER = "writer"
+    UNKNOWN = "unknown"
+
+
 class Event(BaseModel):
-    """Event emitted during research"""
+    """Event emitted during research.
+
+    Legacy phase fields (``event_type``/``title``/``content``) remain for
+    backward compatibility. New fields carry per-message metadata so the
+    frontend can render each message in its own typed block.
+    """
 
     event_type: EventType
     session_id: str
@@ -50,6 +79,14 @@ class Event(BaseModel):
     metadata: Optional[dict] = None
     is_intermediate: bool = True
     timestamp: float  # Unix timestamp
+
+    # Per-message metadata (new)
+    message_type: Optional[MessageKind] = None
+    message_subtype: Optional[str] = None  # e.g. "RealHumanMessage"
+    agent: Optional[AgentName] = None
+    tool_name: Optional[str] = None
+    tool_args: Optional[dict[str, Any]] = None
+    tool_call_id: Optional[str] = None
 
 
 class WebSocketMessage(BaseModel):

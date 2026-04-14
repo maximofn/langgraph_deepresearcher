@@ -1,9 +1,9 @@
-from typing import Dict, Set, Optional
+from typing import Any, Dict, Optional, Set
 from asyncio import Queue
 import asyncio
 import time
 
-from api.models.events import Event, EventType
+from api.models.events import AgentName, Event, EventType, MessageKind
 
 
 class EventService:
@@ -47,8 +47,14 @@ class EventService:
         content: str,
         metadata: Optional[dict] = None,
         is_intermediate: bool = True,
+        message_type: Optional[MessageKind] = None,
+        message_subtype: Optional[str] = None,
+        agent: Optional[AgentName] = None,
+        tool_name: Optional[str] = None,
+        tool_args: Optional[Dict[str, Any]] = None,
+        tool_call_id: Optional[str] = None,
     ):
-        """Emit an event to all consumers of a session"""
+        """Emit an event to all consumers of a session."""
         event = Event(
             event_type=event_type,
             session_id=session_id,
@@ -57,6 +63,12 @@ class EventService:
             metadata=metadata or {},
             is_intermediate=is_intermediate,
             timestamp=time.time(),
+            message_type=message_type,
+            message_subtype=message_subtype,
+            agent=agent,
+            tool_name=tool_name,
+            tool_args=tool_args,
+            tool_call_id=tool_call_id,
         )
 
         # Store in session history

@@ -6,10 +6,10 @@ Provides CRUD operations for sessions and messages.
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from typing import Optional, List
 
-from api.database.models import Session, SessionStatus, Message
+from api.database.models import Message, ResearchEvent, Session, SessionStatus
 
 
 class SessionService:
@@ -105,6 +105,25 @@ class SessionService:
 
         result = await self.db.execute(query)
         return list(result.scalars().all())
+
+    async def delete_session(self, session_id: str) -> bool:
+        """Delete a session and cascade its messages + event log.
+
+        Returns True if the session existed and was removed, False otherwise.
+        """
+        session = await self.get_session(session_id)
+        if session is None:
+            return False
+
+        await self.db.execute(
+            delete(Message).where(Message.session_id == session_id)
+        )
+        await self.db.execute(
+            delete(ResearchEvent).where(ResearchEvent.session_id == session_id)
+        )
+        await self.db.delete(session)
+        await self.db.commit()
+        return True
 
     async def cleanup_expired_sessions(self, expiry_hours: int = 24) -> int:
         """Clean up sessions older than expiry_hours that are not completed"""

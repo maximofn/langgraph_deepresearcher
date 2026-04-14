@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List
 
-from fastapi import APIRouter, BackgroundTasks, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.db import db_session_context, get_db
@@ -184,6 +184,16 @@ async def get_session_messages(session_id: str, db: AsyncSession = Depends(get_d
 
     messages = await svc.get_session_messages(session_id)
     return [MessageResponse.model_validate(msg) for msg in messages]
+
+
+@router.delete("/{session_id}", status_code=204)
+async def delete_session(session_id: str, db: AsyncSession = Depends(get_db)):
+    """Delete a session and cascade its messages + events."""
+    svc = SessionService(db)
+    removed = await svc.delete_session(session_id)
+    if not removed:
+        raise SessionNotFoundError(f"Session {session_id} not found")
+    return Response(status_code=204)
 
 
 @router.get("/", response_model=SessionListResponse)

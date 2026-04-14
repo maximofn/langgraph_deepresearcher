@@ -76,10 +76,7 @@ if settings.enable_rate_limit:
         from slowapi.middleware import SlowAPIMiddleware
         from slowapi.util import get_remote_address
 
-        limiter = Limiter(
-            key_func=get_remote_address,
-            default_limits=[settings.rate_limit_create_session],
-        )
+        limiter = Limiter(key_func=get_remote_address)
         app.state.limiter = limiter
         app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
         app.add_middleware(SlowAPIMiddleware)
