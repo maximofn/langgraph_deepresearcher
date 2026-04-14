@@ -72,7 +72,6 @@ export function BlockShell({
         >
           {title}
         </span>
-        <div className="flex-1" />
         {agent && agent !== 'unknown' && AGENT_PILL[agent] && (
           <span
             className="rounded-[8px] px-2 py-[2px] font-mono text-[9px] font-medium"
@@ -84,6 +83,7 @@ export function BlockShell({
             {AGENT_PILL[agent].label}
           </span>
         )}
+        <div className="flex-1" />
         {rightBadge && (
           <span
             className="rounded-[8px] bg-[#1A1A1A] px-2 py-[2px] font-mono text-[9px] font-medium"
@@ -108,8 +108,11 @@ export function BlockShell({
             setCollapsed((c) => !c);
           }}
           aria-label={collapsed ? 'Expand block' : 'Collapse block'}
-          className="text-[#444444] transition-colors hover:text-[#AAAAAA]"
+          className="flex items-center gap-1 text-[#444444] transition-colors hover:text-[#AAAAAA]"
         >
+          <span className="font-mono text-[10px] uppercase">
+            {collapsed ? 'Expand' : 'Collapse'}
+          </span>
           <ChevronDown
             size={14}
             className={`transition-transform ${collapsed ? '-rotate-90' : ''}`}
