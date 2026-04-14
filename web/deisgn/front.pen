@@ -1184,20 +1184,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "IZHKM",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JsLSN",
+                              "fill": "#555555",
+                              "content": "Scope",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "BtGj7",
                           "name": "msg1Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "PwjDJ",
-                          "name": "msg1Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "3FIyh",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "dHpZ1",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "1Tf1E",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1221,20 +1271,18 @@
                   "id": "mr2RG",
                   "name": "msg2",
                   "width": "fill_container",
-                  "fill": "#0A150A",
-                  "cornerRadius": 8,
+                  "fill": "#0C1A0C",
+                  "cornerRadius": 10,
                   "stroke": {
                     "align": "inside",
-                    "thickness": {
-                      "left": 3
-                    },
-                    "fill": "#00FF0040"
+                    "thickness": 1,
+                    "fill": "#00FF0025"
                   },
                   "layout": "vertical",
                   "gap": 10,
                   "padding": [
-                    14,
-                    16
+                    16,
+                    18
                   ],
                   "children": [
                     {
@@ -1246,19 +1294,34 @@
                       "alignItems": "center",
                       "children": [
                         {
-                          "type": "ellipse",
-                          "id": "SF4QZ",
-                          "name": "msg2Dot",
-                          "fill": "#00FF00",
-                          "width": 8,
-                          "height": 8
+                          "type": "frame",
+                          "id": "1TvUt",
+                          "name": "avatar",
+                          "width": 18,
+                          "height": 18,
+                          "fill": "#00FF0015",
+                          "cornerRadius": 9,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "zLjti",
+                              "name": "userIcon",
+                              "width": 10,
+                              "height": 10,
+                              "iconFontName": "user",
+                              "iconFontFamily": "lucide",
+                              "fill": "#00FF00"
+                            }
+                          ]
                         },
                         {
                           "type": "text",
                           "id": "MDzt7",
                           "name": "msg2Label",
                           "fill": "#00FF00",
-                          "content": "PRO",
+                          "content": "YOU",
                           "fontFamily": "Geist Mono",
                           "fontSize": 11,
                           "fontWeight": "600"
@@ -1271,14 +1334,41 @@
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "eBZva",
-                          "name": "msg2Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "ekqAN",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "pPiYt",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Y80Wn",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1346,20 +1436,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "oogak",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "1WCKg",
+                              "fill": "#555555",
+                              "content": "Scope",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "KSMP5",
                           "name": "msg3Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "cjLlY",
-                          "name": "msg3Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "yGJbx",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "Rc9xU",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Zi567",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1427,20 +1567,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "k8Jed",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "zE2iI",
+                              "fill": "#555555",
+                              "content": "Scope",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "UWVk2",
                           "name": "msg4Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "wKI0g",
-                          "name": "msg4Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "TvCS0",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "mKwDo",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "bl2G1",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1508,20 +1698,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "C6Vuw",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dVcrm",
+                              "fill": "#555555",
+                              "content": "Scope",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "BGgoA",
                           "name": "msg5Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "HvaQI",
-                          "name": "msg5Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "lVRMi",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "aTCZw",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "nmrbV",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1589,20 +1829,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "EeveL",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "O0tW2",
+                              "fill": "#555555",
+                              "content": "Scope",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "J84nm",
                           "name": "msg6Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "Q2cXG",
-                          "name": "msg6Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "PTox6",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "ahXpw",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "wBoNO",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1670,6 +1960,29 @@
                         },
                         {
                           "type": "frame",
+                          "id": "zxJZr",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "iuY15",
+                              "fill": "#555555",
+                              "content": "Supervisor",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "7dCf5",
                           "name": "msg7Spacer",
                           "width": "fill_container",
@@ -1700,14 +2013,41 @@
                           ]
                         },
                         {
-                          "type": "text",
-                          "id": "6IiBP",
-                          "name": "msg7Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "fQJKC",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "d9i4E",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "1HUQc",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -1787,20 +2127,70 @@
                         },
                         {
                           "type": "frame",
+                          "id": "uGmog",
+                          "name": "agentPill",
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 8,
+                          "padding": [
+                            2,
+                            8
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BvSup",
+                              "fill": "#555555",
+                              "content": "Supervisor",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 9,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "nWs8W",
                           "name": "msg8Spacer",
                           "width": "fill_container",
                           "height": 1
                         },
                         {
-                          "type": "text",
-                          "id": "paNbr",
-                          "name": "msg8Copy",
-                          "fill": "#444444",
-                          "content": "COPY",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "xAiNr",
+                          "name": "copyBtn",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#444444"
+                          },
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "PR25a",
+                              "width": 11,
+                              "height": 11,
+                              "iconFontName": "copy",
+                              "iconFontFamily": "lucide",
+                              "fill": "#888888"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Ja1p9",
+                              "fill": "#888888",
+                              "content": "Copy",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -2034,10 +2424,70 @@
                     },
                     {
                       "type": "frame",
+                      "id": "LBieU",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Jg2oZ",
+                          "fill": "#555555",
+                          "content": "Scope",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "yCE8X",
                       "name": "b1spacer",
                       "width": "fill_container",
                       "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9NSKT",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "Cg8LB",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "JQwhN",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2056,14 +2506,12 @@
                   "id": "GZL6x",
                   "name": "Collapsed PRO",
                   "width": "fill_container",
-                  "fill": "#0A150A",
-                  "cornerRadius": 8,
+                  "fill": "#0C1A0C",
+                  "cornerRadius": 10,
                   "stroke": {
                     "align": "inside",
-                    "thickness": {
-                      "left": 3
-                    },
-                    "fill": "#00FF0030"
+                    "thickness": 1,
+                    "fill": "#00FF0025"
                   },
                   "gap": 10,
                   "padding": [
@@ -2073,19 +2521,33 @@
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "ellipse",
-                      "id": "siO4w",
-                      "name": "b2dot",
-                      "fill": "#00FF00",
-                      "width": 8,
-                      "height": 8
+                      "type": "frame",
+                      "id": "8Jy14",
+                      "name": "User Avatar",
+                      "width": 18,
+                      "height": 18,
+                      "fill": "#00FF0015",
+                      "cornerRadius": 9,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "5mGvn",
+                          "width": 10,
+                          "height": 10,
+                          "iconFontName": "user",
+                          "iconFontFamily": "lucide",
+                          "fill": "#00FF00"
+                        }
+                      ]
                     },
                     {
                       "type": "text",
                       "id": "yJLwC",
                       "name": "b2label",
                       "fill": "#00FF00",
-                      "content": "PRO",
+                      "content": "YOU",
                       "fontFamily": "Geist Mono",
                       "fontSize": 11,
                       "fontWeight": "600"
@@ -2096,6 +2558,43 @@
                       "name": "b2spacer",
                       "width": "fill_container",
                       "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "1LA0A",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "zf5nk",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "YxigB",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2150,20 +2649,73 @@
                     },
                     {
                       "type": "frame",
+                      "id": "VdqC8",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "7Sm9q",
+                          "fill": "#555555",
+                          "content": "Scope",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "PYrup",
                       "name": "b3spacer",
                       "width": "fill_container",
                       "height": 1
                     },
                     {
-                      "type": "text",
-                      "id": "9CyWe",
-                      "name": "b3copy",
-                      "fill": "#444444",
-                      "content": "COPY",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 10,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "NcOcU",
+                      "name": "Copy Btn",
+                      "fill": "#00000000",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "3umxJ",
+                          "name": "copyIcon3",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iCIM8",
+                          "name": "copyText3",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2218,10 +2770,70 @@
                     },
                     {
                       "type": "frame",
+                      "id": "EVExb",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "w5tdg",
+                          "fill": "#555555",
+                          "content": "Scope",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "4jQvz",
                       "name": "b4spacer",
                       "width": "fill_container",
                       "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cWD4z",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "moAKe",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RkcQz",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2276,20 +2888,73 @@
                     },
                     {
                       "type": "frame",
+                      "id": "863MQ",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "2QB8B",
+                          "fill": "#555555",
+                          "content": "Scope",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "QVH5V",
                       "name": "b5spacer",
                       "width": "fill_container",
                       "height": 1
                     },
                     {
-                      "type": "text",
-                      "id": "ZSFWf",
-                      "name": "b5copy",
-                      "fill": "#444444",
-                      "content": "COPY",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 10,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "ViBm3",
+                      "name": "Copy Btn",
+                      "fill": "#00000000",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "v9fDQ",
+                          "name": "copyIcon5",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "CDwsi",
+                          "name": "copyText5",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2344,20 +3009,73 @@
                     },
                     {
                       "type": "frame",
+                      "id": "fsQmM",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "7o9Hv",
+                          "fill": "#555555",
+                          "content": "Scope",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "LHl0x",
                       "name": "b6spacer",
                       "width": "fill_container",
                       "height": 1
                     },
                     {
-                      "type": "text",
-                      "id": "kfQgg",
-                      "name": "b6copy",
-                      "fill": "#444444",
-                      "content": "COPY",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 10,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "vP6yA",
+                      "name": "Copy Btn",
+                      "fill": "#00000000",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "Vxa4I",
+                          "name": "copyIcon6",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tjAcB",
+                          "name": "copyText6",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2412,6 +3130,29 @@
                     },
                     {
                       "type": "frame",
+                      "id": "JZntP",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "1SJdx",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "OF9iX",
                       "name": "b7spacer",
                       "width": "fill_container",
@@ -2437,6 +3178,43 @@
                           "fontFamily": "Geist Mono",
                           "fontSize": 9,
                           "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "71V2a",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "Uf03c",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "AJUvZ",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -2493,6 +3271,29 @@
                     },
                     {
                       "type": "frame",
+                      "id": "SLgy1",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "5V4Bv",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "f1iVc",
                       "name": "b8spacer",
                       "width": "fill_container",
@@ -2518,6 +3319,43 @@
                           "fontFamily": "Geist Mono",
                           "fontSize": 9,
                           "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kSrk4",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "Z0700",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "xq9kZ",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -2574,10 +3412,70 @@
                     },
                     {
                       "type": "frame",
+                      "id": "4KguR",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pqa4T",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "9ggRU",
                       "name": "b9spacer",
                       "width": "fill_container",
                       "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "729gW",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "tFrUu",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "S7oWj",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "icon_font",
@@ -2632,6 +3530,29 @@
                     },
                     {
                       "type": "frame",
+                      "id": "hCViX",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "IK5X9",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "t84YO",
                       "name": "b10spacer",
                       "width": "fill_container",
@@ -2657,6 +3578,43 @@
                           "fontFamily": "Geist Mono",
                           "fontSize": 9,
                           "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "flbxX",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "6XCPD",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WD00h",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -2713,6 +3671,29 @@
                     },
                     {
                       "type": "frame",
+                      "id": "ZlwG9",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "whXIY",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "bCptt",
                       "name": "b11spacer",
                       "width": "fill_container",
@@ -2738,6 +3719,43 @@
                           "fontFamily": "Geist Mono",
                           "fontSize": 9,
                           "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "y1gd7",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "deLwF",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "c5Bjk",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -2794,6 +3812,29 @@
                     },
                     {
                       "type": "frame",
+                      "id": "TbJJr",
+                      "name": "Agent Tag",
+                      "fill": "#1A1A1A",
+                      "cornerRadius": 8,
+                      "padding": [
+                        2,
+                        8
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "8Vg2y",
+                          "fill": "#555555",
+                          "content": "Supervisor",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "71nma",
                       "name": "b12spacer",
                       "width": "fill_container",
@@ -2819,6 +3860,43 @@
                           "fontFamily": "Geist Mono",
                           "fontSize": 9,
                           "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "3QiK8",
+                      "name": "Copy Btn",
+                      "cornerRadius": 6,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#444444"
+                      },
+                      "gap": 4,
+                      "padding": [
+                        4,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "6zajA",
+                          "width": 11,
+                          "height": 11,
+                          "iconFontName": "copy",
+                          "iconFontFamily": "lucide",
+                          "fill": "#888888"
+                        },
+                        {
+                          "type": "text",
+                          "id": "vkZQx",
+                          "fill": "#888888",
+                          "content": "Copy",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -3245,6 +4323,34 @@
       },
       "width": 2860,
       "height": 1498
+    },
+    {
+      "type": "rectangle",
+      "id": "9SGVc",
+      "x": 4833,
+      "y": -1295,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-6.png",
+        "mode": "fill"
+      },
+      "width": 2240,
+      "height": 1104
+    },
+    {
+      "type": "rectangle",
+      "id": "qwWCe",
+      "x": 4852,
+      "y": 293,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-7.png",
+        "mode": "fill"
+      },
+      "width": 2202,
+      "height": 1478
     }
   ]
 }

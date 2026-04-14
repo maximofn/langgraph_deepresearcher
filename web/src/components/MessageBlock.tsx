@@ -1,5 +1,5 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Copy } from 'lucide-react';
 import type { AgentName, MessageKind, ResearchEvent } from '@/api/types';
 import { useCollapseAll } from './CollapseAllContext';
 
@@ -96,9 +96,14 @@ export function BlockShell({
           <button
             type="button"
             onClick={handleCopy}
-            className="font-mono text-[10px] text-[#444444] transition-colors hover:text-[#AAAAAA]"
+            className={`group inline-flex items-center gap-1 rounded-[6px] border px-[10px] py-[4px] font-mono text-[10px] transition-colors ${
+              copied
+                ? 'border-[#00FF00] text-[#00FF00]'
+                : 'border-[#444444] bg-transparent text-[#888888] hover:border-[#666666] hover:bg-[#1A1A1A] hover:text-[#AAAAAA] active:border-[#00FF00] active:text-[#00FF00]'
+            }`}
           >
-            {copied ? 'COPIED' : 'COPY'}
+            {copied ? <Check size={11} /> : <Copy size={11} />}
+            <span>{copied ? 'Copied!' : 'Copy'}</span>
           </button>
         )}
         <button
