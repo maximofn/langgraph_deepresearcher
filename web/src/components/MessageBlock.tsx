@@ -1,62 +1,120 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import type { AgentName, MessageKind, ResearchEvent } from '@/api/types';
+import { useCollapseAll } from './CollapseAllContext';
 
 interface BlockShellProps {
-  color: string; // hex or tailwind bg value
-  emoji: string;
+  color: string;
+  cardBg: string;
   title: string;
   agent?: AgentName | null;
   children: ReactNode;
+  copyText?: string;
+  rightBadge?: string;
   defaultCollapsed?: boolean;
 }
 
 export function BlockShell({
   color,
-  emoji,
+  cardBg,
   title,
   agent,
   children,
+  copyText,
+  rightBadge,
   defaultCollapsed = false,
 }: BlockShellProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [copied, setCopied] = useState(false);
+  const collapseAll = useCollapseAll();
+  useEffect(() => {
+    if (!collapseAll || collapseAll.version === 0) return;
+    setCollapsed(collapseAll.target);
+  }, [collapseAll?.version, collapseAll?.target]);
+
+  const handleCopy = async (e: MouseEvent) => {
+    e.stopPropagation();
+    if (!copyText) return;
+    try {
+      await navigator.clipboard.writeText(copyText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      /* ignore */
+    }
+  };
+
   return (
     <div
-      className="my-2 rounded-md border-l-4 bg-neutral-900/40 px-4 py-3 shadow-sm"
-      style={{ borderLeftColor: color, backgroundColor: `${color}0d` }}
+      className={`mb-0.5 overflow-hidden rounded-[8px] border-l-[3px] ${
+        collapsed ? 'cursor-pointer' : ''
+      }`}
+      style={{
+        borderLeftColor: `${color}${collapsed ? '33' : '66'}`,
+        backgroundColor: cardBg,
+      }}
+      onClick={collapsed ? () => setCollapsed(false) : undefined}
+      role={collapsed ? 'button' : undefined}
     >
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide">
-        <span className="text-base">{emoji}</span>
-        <span className="font-semibold" style={{ color }}>
+      <div
+        className={`flex items-center gap-2.5 ${
+          collapsed ? 'px-3.5 py-[10px]' : 'cursor-pointer px-4 pb-2.5 pt-[14px]'
+        }`}
+        onClick={!collapsed ? () => setCollapsed(true) : undefined}
+      >
+        <span
+          className="inline-block h-2 w-2 shrink-0 rounded-full"
+          style={{ backgroundColor: color }}
+        />
+        <span
+          className="font-mono text-[11px] font-semibold uppercase tracking-wide"
+          style={{ color }}
+        >
           {title}
         </span>
-        {agent && agent !== 'unknown' && (
-          <span className="ml-auto rounded bg-neutral-800 px-2 py-0.5 text-[10px] font-medium text-neutral-400">
-            {agent}
+        <div className="flex-1" />
+        {agent && agent !== 'unknown' && AGENT_PILL[agent] && (
+          <span
+            className="rounded-[8px] px-2 py-[2px] font-mono text-[9px] font-medium"
+            style={{
+              backgroundColor: `${AGENT_PILL[agent].color}22`,
+              color: AGENT_PILL[agent].color,
+            }}
+          >
+            {AGENT_PILL[agent].label}
           </span>
+        )}
+        {rightBadge && (
+          <span
+            className="rounded-[8px] bg-[#1A1A1A] px-2 py-[2px] font-mono text-[9px] font-medium"
+            style={{ color }}
+          >
+            {rightBadge}
+          </span>
+        )}
+        {copyText && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="font-mono text-[10px] text-[#444444] transition-colors hover:text-[#AAAAAA]"
+          >
+            {copied ? 'COPIED' : 'COPY'}
+          </button>
         )}
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? 'Expand block' : 'Collapse block'}
-          title={collapsed ? 'Expand' : 'Collapse'}
-          className={`${agent && agent !== 'unknown' ? '' : 'ml-auto'} rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200 transition-colors`}
+          className="text-[#444444] transition-colors hover:text-[#AAAAAA]"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className={`h-4 w-4 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <ChevronDown
+            size={14}
+            className={`transition-transform ${collapsed ? '-rotate-90' : ''}`}
+          />
         </button>
       </div>
       {!collapsed && (
-        <div className="mt-1 text-sm text-neutral-200 whitespace-pre-wrap break-words">
+        <div className="px-4 pb-[14px] font-sans text-[13px] leading-[1.4] text-[#CCCCCC]">
           {children}
         </div>
       )}
@@ -64,21 +122,34 @@ export function BlockShell({
   );
 }
 
-export const BLOCK_CONFIG: Record<
-  string,
-  { color: string; emoji: string; title: string }
+export const AGENT_PILL: Record<
+  Exclude<AgentName, 'unknown'>,
+  { label: string; color: string }
 > = {
-  Human: { color: '#201ADB', emoji: '🧑', title: 'User' },
-  AI: { color: '#24FA00', emoji: '🤖', title: 'Assistant' },
-  ClarifyWithUser: { color: '#37DB1A', emoji: '❓', title: 'Clarify With User' },
-  ResearchQuestion: { color: '#37DB1A', emoji: '📋', title: 'Research Brief' },
-  Tool: { color: '#EAB308', emoji: '📤', title: 'Tool Output' },
-  ToolCall: { color: '#C026D3', emoji: '🔧', title: 'Tool Call' },
-  System: { color: '#EF4444', emoji: '⚙️', title: 'System' },
-  Other: { color: '#A3A3A3', emoji: '📝', title: 'Message' },
+  scope: { label: 'Agent Scope', color: '#A855F7' },
+  supervisor: { label: 'Agent Supervisor', color: '#0EA5E9' },
+  research: { label: 'Agent Researcher', color: '#22C55E' },
+  writer: { label: 'Agent Writer', color: '#F59E0B' },
 };
 
-export function getBlockConfig(kind: MessageKind | null | undefined) {
+export interface BlockStyle {
+  color: string;
+  cardBg: string;
+  title: string;
+}
+
+export const BLOCK_CONFIG: Record<string, BlockStyle> = {
+  Human: { color: '#00FF00', cardBg: '#0A150A', title: 'PRO' },
+  AI: { color: '#00FF00', cardBg: '#0A150A', title: 'ASSISTANT' },
+  ClarifyWithUser: { color: '#FF6B6B', cardBg: '#150A0A', title: 'CLARIFY WITH USER' },
+  ResearchQuestion: { color: '#C084FC', cardBg: '#100A15', title: 'RESEARCH BRIEF' },
+  Tool: { color: '#F472B6', cardBg: '#150A10', title: 'TOOL OUTPUT' },
+  ToolCall: { color: '#06B6D4', cardBg: '#0A1215', title: 'TOOL CALL' },
+  System: { color: '#FFB800', cardBg: '#15120A', title: 'SYSTEM' },
+  Other: { color: '#6B8AFF', cardBg: '#0A0D15', title: 'MESSAGE' },
+};
+
+export function getBlockConfig(kind: MessageKind | null | undefined): BlockStyle {
   return BLOCK_CONFIG[kind || 'Other'] || BLOCK_CONFIG.Other;
 }
 

@@ -25,10 +25,14 @@ export function ClarifyInput({ onSubmit, disabled }: ClarifyInputProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="my-4 rounded-lg border border-amber-600 bg-amber-950/30 p-4"
+      className="my-3 rounded-[8px] border-l-[3px] px-4 py-3"
+      style={{ borderLeftColor: '#FF6B6B66', backgroundColor: '#150A0A' }}
     >
-      <div className="mb-2 text-sm font-semibold text-amber-300">
-        The agent needs more info to continue
+      <div className="mb-2 flex items-center gap-2">
+        <span className="inline-block h-2 w-2 rounded-full bg-[#FF6B6B]" />
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-[#FF6B6B]">
+          Awaiting clarification
+        </span>
       </div>
       <div className="flex gap-2">
         <input
@@ -36,12 +40,12 @@ export function ClarifyInput({ onSubmit, disabled }: ClarifyInputProps) {
           onChange={(e) => setValue(e.target.value)}
           placeholder="Type your clarification…"
           disabled={disabled || submitting}
-          className="flex-1 rounded bg-neutral-900 px-3 py-2 text-sm outline-none ring-1 ring-neutral-700 focus:ring-amber-500"
+          className="h-9 flex-1 rounded-[8px] bg-terminal-surface px-3 font-sans text-[13px] text-terminal-textPrimary outline-none ring-1 ring-inset ring-[#1A1A1A] placeholder:text-[#666666] focus:ring-[#FF6B6B66]"
         />
         <button
           type="submit"
           disabled={disabled || submitting || !value.trim()}
-          className="flex items-center gap-1 rounded bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-500 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-[8px] bg-[#FF6B6B] px-4 font-sans text-[13px] font-semibold text-black transition-[filter] hover:brightness-110 disabled:opacity-50"
         >
           <Send size={14} /> Send
         </button>

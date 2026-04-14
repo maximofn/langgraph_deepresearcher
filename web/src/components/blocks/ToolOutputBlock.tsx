@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 
 import { BlockShell, getBlockConfig } from '@/components/MessageBlock';
 import type { ResearchEvent } from '@/api/types';
@@ -12,19 +11,28 @@ export function ToolOutputBlock({ event }: { event: ResearchEvent }) {
   const content = event.content || '';
   const isLong = content.length > PREVIEW_CHARS;
   const preview = isLong && !open ? content.slice(0, PREVIEW_CHARS) + '…' : content;
-
-  const name = event.tool_name ? `Tool Output: ${event.tool_name}` : cfg.title;
+  const name = event.tool_name
+    ? `TOOL OUTPUT: ${event.tool_name.toUpperCase()}`
+    : cfg.title;
 
   return (
-    <BlockShell color={cfg.color} emoji={cfg.emoji} title={name} agent={event.agent}>
-      <div className="font-mono text-xs leading-relaxed">{preview}</div>
+    <BlockShell
+      color={cfg.color}
+      cardBg={cfg.cardBg}
+      title={name}
+      agent={event.agent}
+      copyText={content}
+    >
+      <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded-[6px] bg-[#080808] p-3 font-mono text-[12px] leading-[1.5] text-[#888888]">
+        {preview}
+      </pre>
       {isLong && (
         <button
-          onClick={() => setOpen(!open)}
-          className="mt-2 flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-200"
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="mt-2 font-mono text-[11px] text-[#00FF00] hover:brightness-125"
         >
-          {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          {open ? 'Collapse' : `Expand (${content.length} chars)`}
+          {open ? 'Show less' : `Expand (${content.length} chars)`}
         </button>
       )}
     </BlockShell>

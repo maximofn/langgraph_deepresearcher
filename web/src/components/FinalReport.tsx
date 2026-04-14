@@ -1,15 +1,30 @@
-import { useState } from 'react';
-import { Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ChevronDown, Download, FileText, Link as LinkIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+
+import { useCollapseAll } from './CollapseAllContext';
 
 interface FinalReportProps {
   markdown: string;
   filenameHint?: string;
 }
 
+function countSources(markdown: string): number {
+  const urls = markdown.match(/https?:\/\/[^\s)\]]+/g);
+  if (!urls) return 0;
+  return new Set(urls).size;
+}
+
 export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const collapseAll = useCollapseAll();
+  useEffect(() => {
+    if (!collapseAll || collapseAll.version === 0) return;
+    setCollapsed(collapseAll.target);
+  }, [collapseAll?.version, collapseAll?.target]);
+
+  const sourceCount = useMemo(() => countSources(markdown), [markdown]);
 
   const handleDownload = () => {
     const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
@@ -24,43 +39,50 @@ export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportPr
   };
 
   return (
-    <div className="my-4 rounded-lg border border-emerald-700 bg-emerald-950/30 p-5">
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 text-lg font-semibold text-emerald-300">
-          <span>📄</span> Final Report
-        </h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-1 rounded bg-emerald-700 px-3 py-1 text-sm text-white hover:bg-emerald-600"
-          >
-            <Download size={14} /> Download .md
-          </button>
+    <div className="mt-2 pt-2">
+      <div className="h-px w-full bg-[#1E1E1E]" />
+
+      <div className="flex items-center justify-between gap-4 pb-3 pt-4">
+        <div className="flex items-center gap-2.5">
+          <FileText size={18} className="text-white" />
+          <span className="font-sans text-[16px] font-semibold text-white">
+            Final Report
+          </span>
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
             aria-label={collapsed ? 'Expand report' : 'Collapse report'}
-            title={collapsed ? 'Expand' : 'Collapse'}
-            className="rounded p-1 text-emerald-300 hover:bg-emerald-900/60 transition-colors"
+            className="ml-1 text-[#444444] transition-colors hover:text-[#AAAAAA]"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className={`h-4 w-4 transition-transform ${collapsed ? '-rotate-90' : ''}`}
-            >
-              <path
-                fillRule="evenodd"
-                d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${collapsed ? '-rotate-90' : ''}`}
+            />
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          {sourceCount > 0 && (
+            <div className="flex items-center gap-1.5 rounded-[8px] border border-[#1E1E1E] px-3 py-1.5">
+              <LinkIcon size={12} className="text-[#666666]" />
+              <span className="font-mono text-[11px] text-[#666666]">
+                {sourceCount} source{sourceCount === 1 ? '' : 's'}
+              </span>
+            </div>
+          )}
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1.5 rounded-[8px] bg-[#00FF00] px-3.5 py-2 font-sans text-[12px] font-semibold text-black transition-[filter] hover:brightness-110"
+          >
+            <Download size={14} /> Download .md
           </button>
         </div>
       </div>
+
       {!collapsed && (
-        <div className="markdown-body text-neutral-100">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+        <div className="rounded-[10px] border border-[#1E1E1E] bg-[#111111] px-7 pt-6 pb-7">
+          <div className="markdown-body">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+          </div>
         </div>
       )}
     </div>
