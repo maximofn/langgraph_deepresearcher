@@ -57,11 +57,18 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
                     type="event",
                     data={
                         "event_type": event.event_type,
+                        "session_id": event.session_id,
                         "title": event.title,
                         "content": event.content,
                         "is_intermediate": event.is_intermediate,
                         "timestamp": event.timestamp,
                         "metadata": event.metadata,
+                        "message_type": event.message_type,
+                        "message_subtype": event.message_subtype,
+                        "agent": event.agent,
+                        "tool_name": event.tool_name,
+                        "tool_args": event.tool_args,
+                        "tool_call_id": event.tool_call_id,
                     },
                 )
 
