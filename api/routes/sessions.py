@@ -18,6 +18,7 @@ from api.models.responses import (
     SessionResponse,
     StartResearchResponse,
 )
+from api.services.email_service import send_report_email
 from api.services.research_service import ResearchService
 from api.services.session_service import SessionService
 from api.utils.exceptions import InvalidSessionStateError, SessionNotFoundError
@@ -57,6 +58,13 @@ async def _run_research_bg(session_id: str) -> None:
                     research_brief=result["research_brief"],
                     final_report=result["final_report"],
                 )
+                if session.user_email and result.get("final_report"):
+                    send_report_email(
+                        to_email=session.user_email,
+                        user_name=session.user_name,
+                        query=session.initial_query,
+                        final_report=result["final_report"],
+                    )
         except Exception:
             logger.exception("Research failed for session %s", session_id)
             await svc.update_session_status(session_id, SessionStatus.FAILED)
@@ -91,6 +99,13 @@ async def _continue_research_bg(
                 research_brief=result["research_brief"],
                 final_report=result["final_report"],
             )
+            if session.user_email and result.get("final_report"):
+                send_report_email(
+                    to_email=session.user_email,
+                    user_name=session.user_name,
+                    query=session.initial_query,
+                    final_report=result["final_report"],
+                )
         except Exception:
             logger.exception("Clarification run failed for session %s", session_id)
             await svc.update_session_status(session_id, SessionStatus.FAILED)

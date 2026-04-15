@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     tavily_api_key: Optional[str] = None
     langsmith_api_key: Optional[str] = None
 
+    # Email delivery
+    resend_api_key: Optional[str] = None
+    email_from: str = "Deep Researcher <noreply@maximofn.com>"
+
     class Config:
         env_file = ".env"
         case_sensitive = False
