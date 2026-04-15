@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background rounded square matching sidebar style -->
+  <rect width="32" height="32" rx="8" fill="#0a0a0a"/>
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="7.25" stroke="#00FF0040" stroke-width="1.5"/>
+
+  <!-- BrainCircuit icon (lucide), scaled to fit 8-24 range (16x16 centered) -->
+  <!-- Translated to center in 32x32: offset 8,8 scale ~1 -->
+  <g transform="translate(8, 8) scale(0.667)">
+    <!-- Brain left lobe -->
+    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Brain right lobe -->
+    <path d="M9 13a4.5 4.5 0 0 0 6-4" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Circuit lines -->
+    <path d="M12 13h2" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 13v5" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 18h2" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M16 18v3" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 5v3" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 8h2" stroke="#00FF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Circuit nodes -->
+    <circle cx="16" cy="18" r="1" fill="#00FF00"/>
+    <circle cx="16" cy="21" r="1" fill="#00FF00"/>
+    <circle cx="14" cy="13" r="1" fill="#00FF00"/>
+  </g>
+</svg>
