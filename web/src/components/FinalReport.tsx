@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { ChevronDown, Download, FileText, Link as LinkIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -17,12 +17,24 @@ function countSources(markdown: string): number {
 }
 
 export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportProps) {
+  const id = useId();
   const [collapsed, setCollapsed] = useState(false);
   const collapseAll = useCollapseAll();
+
+  // Sync with global collapse/expand command
   useEffect(() => {
     if (!collapseAll || collapseAll.version === 0) return;
     setCollapsed(collapseAll.target);
   }, [collapseAll?.version, collapseAll?.target]);
+
+  // Report this block's collapsed state back to the context
+  const { registerBlock, unregisterBlock } = collapseAll ?? {};
+  useEffect(() => {
+    registerBlock?.(id, collapsed);
+  }, [registerBlock, id, collapsed]);
+  useEffect(() => {
+    return () => unregisterBlock?.(id);
+  }, [unregisterBlock, id]);
 
   const sourceCount = useMemo(() => countSources(markdown), [markdown]);
 

@@ -13,9 +13,8 @@ import { StatusBadge } from './StatusBadge';
 function CollapseAllButtons() {
   const ctx = useCollapseAll();
   if (!ctx) return null;
-  const active = ctx.version > 0 ? ctx.target : null;
-  const collapseActive = active === true;
-  const expandActive = active === false;
+  const collapseActive = ctx.allCollapsed;
+  const expandActive = ctx.allExpanded;
   return (
     <div className="flex items-center gap-2">
       <button

@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, useState, type MouseEvent, type ReactNode } from 'react';
 import { Check, ChevronDown, Copy } from 'lucide-react';
 import type { AgentName, MessageKind, ResearchEvent } from '@/api/types';
 import { useCollapseAll } from './CollapseAllContext';
@@ -24,13 +24,25 @@ export function BlockShell({
   rightBadge,
   defaultCollapsed = false,
 }: BlockShellProps) {
+  const id = useId();
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [copied, setCopied] = useState(false);
   const collapseAll = useCollapseAll();
+
+  // Sync with global collapse/expand command
   useEffect(() => {
     if (!collapseAll || collapseAll.version === 0) return;
     setCollapsed(collapseAll.target);
   }, [collapseAll?.version, collapseAll?.target]);
+
+  // Report this block's collapsed state back to the context
+  const { registerBlock, unregisterBlock } = collapseAll ?? {};
+  useEffect(() => {
+    registerBlock?.(id, collapsed);
+  }, [registerBlock, id, collapsed]);
+  useEffect(() => {
+    return () => unregisterBlock?.(id);
+  }, [unregisterBlock, id]);
 
   const handleCopy = async (e: MouseEvent) => {
     e.stopPropagation();
