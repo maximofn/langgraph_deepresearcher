@@ -138,7 +138,7 @@ export function Sidebar({ onNewResearch }: SidebarProps) {
               onClick={() => navigate(`/session/${s.id}`)}
               className={`group relative cursor-pointer rounded-[8px] p-3 transition-colors ${
                 active
-                  ? 'bg-[#00FF0015] border border-[#00FF0030]'
+                  ? 'bg-[#00FF0005] border border-[#00FF0015]'
                   : 'bg-[#0F0F0F] hover:bg-[#121212]'
               }`}
             >

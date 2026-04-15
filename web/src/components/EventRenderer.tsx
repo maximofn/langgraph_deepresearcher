@@ -16,6 +16,12 @@ export function EventRenderer({ event }: { event: ResearchEvent }) {
     return null;
   }
 
+  // MESSAGE (Other) blocks always duplicate the preceding AI block.
+  // Covers both explicit 'Other' and null/undefined (which getBlockConfig also maps to MESSAGE).
+  if (!event.message_type || event.message_type === 'Other') {
+    return null;
+  }
+
   switch (event.message_type) {
     case 'ToolCall':
       return <ToolCallBlock event={event} />;
