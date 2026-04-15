@@ -25,8 +25,14 @@ export function useWebSocket({ sessionId, onEvent, enabled = true }: UseWebSocke
       return;
     }
 
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${proto}//${window.location.host}/ws/${sessionId}`;
+    const apiUrl = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+    let url: string;
+    if (apiUrl) {
+      url = `${apiUrl.replace(/^http/, 'ws')}/ws/${sessionId}`;
+    } else {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      url = `${proto}//${window.location.host}/ws/${sessionId}`;
+    }
     const ws = new WebSocket(url);
     wsRef.current = ws;
     setStatus('connecting');

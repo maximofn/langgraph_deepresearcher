@@ -22,4 +22,4 @@ COPY run_api.py ./
 
 EXPOSE 8000
 
-CMD ["uv", "run", "python", "run_api.py"]
+CMD [".venv/bin/python", "run_api.py"]
