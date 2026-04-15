@@ -11,6 +11,11 @@ export function EventRenderer({ event }: { event: ResearchEvent }) {
     return null;
   }
 
+  // System and AI messages from the scope agent are internal — not useful to the user.
+  if (event.agent === 'scope' && (event.message_type === 'System' || event.message_type === 'AI')) {
+    return null;
+  }
+
   switch (event.message_type) {
     case 'ToolCall':
       return <ToolCallBlock event={event} />;

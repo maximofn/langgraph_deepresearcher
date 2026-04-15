@@ -9,7 +9,12 @@ export function SimpleBlock({ event }: { event: ResearchEvent }) {
   }
   const cfg = getBlockConfig(event.message_type);
   const title = cfg.title;
-  const content = event.content || '';
+  const raw = event.content || '';
+  // Strip the research_brief='...' wrapper produced by the scope agent
+  const content =
+    event.message_type === 'ResearchQuestion'
+      ? (raw.match(/^research_brief='([\s\S]*)'\s*$/)?.[1] ?? raw)
+      : raw;
   return (
     <BlockShell
       color={cfg.color}
