@@ -100,10 +100,21 @@ export interface ModelInfo {
   api_key_env: string;
 }
 
+export interface ProviderStatus {
+  ok: boolean;
+  count?: number | null;
+  error?: string | null;
+}
+
 export interface ModelsCatalogResponse {
   models: ModelInfo[];
   defaults: Record<string, string>;
   roles: string[];
+  providers?: Record<string, ProviderStatus> | null;
+}
+
+export interface ModelsDiscoverRequest {
+  api_keys: ApiKeysMap;
 }
 
 export interface CreateSessionResponse {

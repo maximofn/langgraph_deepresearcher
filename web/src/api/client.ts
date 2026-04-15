@@ -1,5 +1,6 @@
 import type {
   ApiError,
+  ApiKeysMap,
   CreateSessionRequest,
   CreateSessionResponse,
   ModelsCatalogResponse,
@@ -60,4 +61,10 @@ export const api = {
     request<void>(`/sessions/${id}`, { method: 'DELETE' }),
 
   getModels: () => request<ModelsCatalogResponse>('/models/'),
+
+  discoverModels: (apiKeys: ApiKeysMap) =>
+    request<ModelsCatalogResponse>('/models/discover', {
+      method: 'POST',
+      body: JSON.stringify({ api_keys: apiKeys }),
+    }),
 };

@@ -1,6 +1,11 @@
-import { useState } from 'react';
-import { Eye, EyeOff, Trash2 } from 'lucide-react';
-import { useSessionStore } from '@/state/sessionStore';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, Eye, EyeOff, Loader2, Trash2 } from 'lucide-react';
+import { api } from '@/api/client';
+import {
+  DISCOVERY_TTL_MS,
+  hashApiKeys,
+  useSessionStore,
+} from '@/state/sessionStore';
 
 export function UserInfoSection() {
   const userInfo = useSessionStore((s) => s.userInfo);
@@ -181,21 +186,80 @@ export function ApiKeysSection() {
   );
 }
 
+const PROVIDER_LABELS_SHORT: Record<string, string> = {
+  OPENAI_API_KEY: 'OpenAI',
+  ANTHROPIC_API_KEY: 'Anthropic',
+  GEMINI_API_KEY: 'Gemini',
+  KIMI_K2_API_KEY: 'Kimi',
+  CEREBRAS_API_KEY: 'Cerebras',
+  GITHUB_API_KEY: 'GitHub',
+};
+
 export function ModelsSection() {
   const modelsCatalog = useSessionStore((s) => s.modelsCatalog);
   const selectedModels = useSessionStore((s) => s.selectedModels);
   const setSelectedModels = useSessionStore((s) => s.setSelectedModels);
   const apiKeys = useSessionStore((s) => s.apiKeys);
+  const discoveredCatalog = useSessionStore((s) => s.discoveredCatalog);
+  const discoveredCatalogAt = useSessionStore((s) => s.discoveredCatalogAt);
+  const discoveredForKeysHash = useSessionStore((s) => s.discoveredForKeysHash);
+  const isDiscovering = useSessionStore((s) => s.isDiscovering);
+  const discoveryError = useSessionStore((s) => s.discoveryError);
+  const setDiscovering = useSessionStore((s) => s.setDiscovering);
+  const setDiscoveredCatalog = useSessionStore((s) => s.setDiscoveredCatalog);
+  const setDiscoveryError = useSessionStore((s) => s.setDiscoveryError);
 
-  const catalogLoaded = modelsCatalog !== null;
-  const availableModels = modelsCatalog?.models ?? [];
-  const roles = modelsCatalog?.roles ?? [];
+  // Trigger a discovery run on mount if the user has API keys and the
+  // cache is missing, stale, or was built for a different set of providers.
+  useEffect(() => {
+    const currentHash = hashApiKeys(apiKeys);
+    if (!currentHash) return; // no keys -> nothing to discover
+
+    const stale =
+      discoveredCatalogAt === null ||
+      Date.now() - discoveredCatalogAt > DISCOVERY_TTL_MS;
+    const mismatch = discoveredForKeysHash !== currentHash;
+
+    if (!discoveredCatalog || stale || mismatch) {
+      let cancelled = false;
+      setDiscovering(true);
+      api
+        .discoverModels(apiKeys)
+        .then((catalog) => {
+          if (cancelled) return;
+          setDiscoveredCatalog(catalog, currentHash);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          const msg =
+            (err && typeof err === 'object' && 'message' in err
+              ? String((err as { message: unknown }).message)
+              : null) || 'Discovery failed';
+          setDiscoveryError(msg);
+        });
+      return () => {
+        cancelled = true;
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const effectiveCatalog = discoveredCatalog ?? modelsCatalog;
+  const catalogLoaded = effectiveCatalog !== null;
+  const availableModels = effectiveCatalog?.models ?? [];
+  const roles = effectiveCatalog?.roles ?? [];
 
   const filledEnvs = new Set(
     Object.entries(apiKeys)
       .filter(([, v]) => v && v.trim().length > 0)
       .map(([k]) => k),
   );
+
+  const failedProviders = discoveredCatalog?.providers
+    ? Object.entries(discoveredCatalog.providers)
+        .filter(([, status]) => !status.ok)
+        .map(([env]) => PROVIDER_LABELS_SHORT[env] ?? env)
+    : [];
 
   const handleModelChange = (role: string, modelName: string) => {
     setSelectedModels({ ...selectedModels, [role]: modelName });
@@ -209,7 +273,50 @@ export function ModelsSection() {
       >
         MODELS PER AGENT
       </label>
-      {!catalogLoaded ? (
+
+      {discoveryError && (
+        <div
+          className="flex items-start gap-2 rounded-[8px] px-3 py-2"
+          style={{
+            background: '#2A1A0A',
+            border: '1px solid #553311',
+            fontSize: '11px',
+            color: '#DDAA66',
+          }}
+        >
+          <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+          <span>Discovery failed: {discoveryError}. Showing cached catalog.</span>
+        </div>
+      )}
+      {!discoveryError && failedProviders.length > 0 && (
+        <div
+          className="flex items-start gap-2 rounded-[8px] px-3 py-2"
+          style={{
+            background: '#2A1A0A',
+            border: '1px solid #553311',
+            fontSize: '11px',
+            color: '#DDAA66',
+          }}
+        >
+          <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+          <span>Some providers failed: {failedProviders.join(', ')}</span>
+        </div>
+      )}
+
+      {isDiscovering ? (
+        <div
+          className="flex items-center justify-center gap-2 rounded-[8px] py-8"
+          style={{
+            background: '#0A0A0A',
+            border: '1px dashed #222222',
+            color: '#888888',
+            fontSize: '13px',
+          }}
+        >
+          <Loader2 size={16} className="animate-spin" />
+          <span>Discovering models…</span>
+        </div>
+      ) : !catalogLoaded ? (
         <div style={{ fontSize: '12px', color: '#666666' }}>Loading models…</div>
       ) : availableModels.length === 0 ? (
         <div style={{ fontSize: '12px', color: '#CC6666' }}>

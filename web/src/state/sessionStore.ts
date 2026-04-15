@@ -10,6 +10,19 @@ const MODELS_STORAGE_KEY = 'deepresearch.models';
 const API_KEYS_STORAGE_KEY = 'deepresearch.apikeys';
 const USER_INFO_STORAGE_KEY = 'deepresearch.userinfo';
 
+export const DISCOVERY_TTL_MS = 5 * 60 * 1000;
+
+// Deterministic hash of which api_key envs are present (NOT their values).
+// Used to invalidate the discovered cache when the user adds or removes a
+// provider key without ever storing the actual key material in the hash.
+export function hashApiKeys(keys: Record<string, string>): string {
+  return Object.entries(keys)
+    .filter(([, v]) => v && v.trim().length > 0)
+    .map(([k]) => k)
+    .sort()
+    .join('|');
+}
+
 export interface UserInfo {
   name: string;
   email: string;
@@ -130,6 +143,18 @@ interface SessionState {
   // User contact info (name + email) used for final-report delivery
   userInfo: UserInfo;
   setUserInfo: (info: UserInfo) => void;
+
+  // Live model discovery (per-provider API calls). Not persisted to
+  // localStorage — lives only for this browser session.
+  discoveredCatalog: ModelsCatalogResponse | null;
+  discoveredCatalogAt: number | null;
+  discoveredForKeysHash: string | null;
+  isDiscovering: boolean;
+  discoveryError: string | null;
+  setDiscovering: (value: boolean) => void;
+  setDiscoveredCatalog: (catalog: ModelsCatalogResponse, keysHash: string) => void;
+  setDiscoveryError: (error: string | null) => void;
+  clearDiscovery: () => void;
 }
 
 export const useSessionStore = create<SessionState>((set) => ({
@@ -192,14 +217,54 @@ export const useSessionStore = create<SessionState>((set) => ({
   },
 
   apiKeys: loadApiKeysFromStorage(),
-  setApiKeys: (keys) => {
-    persistApiKeys(keys);
-    set({ apiKeys: keys });
-  },
+  setApiKeys: (keys) =>
+    set((state) => {
+      persistApiKeys(keys);
+      const newHash = hashApiKeys(keys);
+      // If the set of providers with a key changed, wipe the discovered
+      // cache so the next modal open will re-run discovery.
+      const discoveryInvalidated = newHash !== state.discoveredForKeysHash;
+      return {
+        apiKeys: keys,
+        ...(discoveryInvalidated
+          ? {
+              discoveredCatalog: null,
+              discoveredCatalogAt: null,
+              discoveredForKeysHash: null,
+              discoveryError: null,
+            }
+          : {}),
+      };
+    }),
 
   userInfo: loadUserInfoFromStorage(),
   setUserInfo: (info) => {
     persistUserInfo(info);
     set({ userInfo: info });
   },
+
+  discoveredCatalog: null,
+  discoveredCatalogAt: null,
+  discoveredForKeysHash: null,
+  isDiscovering: false,
+  discoveryError: null,
+  setDiscovering: (value) => set({ isDiscovering: value }),
+  setDiscoveredCatalog: (catalog, keysHash) =>
+    set({
+      discoveredCatalog: catalog,
+      discoveredCatalogAt: Date.now(),
+      discoveredForKeysHash: keysHash,
+      discoveryError: null,
+      isDiscovering: false,
+    }),
+  setDiscoveryError: (error) =>
+    set({ discoveryError: error, isDiscovering: false }),
+  clearDiscovery: () =>
+    set({
+      discoveredCatalog: null,
+      discoveredCatalogAt: null,
+      discoveredForKeysHash: null,
+      discoveryError: null,
+      isDiscovering: false,
+    }),
 }));

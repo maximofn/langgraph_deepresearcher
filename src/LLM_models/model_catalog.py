@@ -168,8 +168,48 @@ ROLE_MAX_TOKENS_OVERRIDES: Dict[str, int] = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Dynamic registry — populated at runtime by /models/discover responses.
+#
+# Process-local; lost on backend restart. When the user picks a model that
+# the live /models/discover call returned but isn't in MODEL_CATALOG,
+# resolve_model_config falls back to this registry.
+# ---------------------------------------------------------------------------
+
+_dynamic_registry: Dict[str, Dict[str, Any]] = {}
+
+
+def register_dynamic_models(entries: Any) -> None:
+    """Add or update discovered models in the in-memory registry.
+
+    ``entries`` is an iterable of dicts carrying at minimum ``name``,
+    ``provider``, ``base_url``, ``api_key_env``, and optionally
+    ``default_max_tokens`` and ``default_temperature``.
+    """
+    for entry in entries:
+        name = entry.get("name")
+        if not name:
+            continue
+        _dynamic_registry[name] = {
+            "label": entry.get("label", name),
+            "provider": entry["provider"],
+            "base_url": entry.get("base_url", ""),
+            "api_key_env": entry["api_key_env"],
+            "default_temperature": entry.get("default_temperature", 0.0),
+            "default_max_tokens": entry.get("default_max_tokens"),
+        }
+
+
+def _lookup_catalog_entry(model_name: str) -> Optional[Dict[str, Any]]:
+    if model_name in MODEL_CATALOG:
+        return MODEL_CATALOG[model_name]
+    if model_name in _dynamic_registry:
+        return _dynamic_registry[model_name]
+    return None
+
+
 def is_known_model(model_name: str) -> bool:
-    return model_name in MODEL_CATALOG
+    return model_name in MODEL_CATALOG or model_name in _dynamic_registry
 
 
 def is_known_role(role: str) -> bool:
@@ -206,10 +246,10 @@ def resolve_model_config(
     If ``api_keys`` is given, it is used to look up the provider API key
     before falling back to the environment.
     """
-    if model_name not in MODEL_CATALOG:
+    entry = _lookup_catalog_entry(model_name)
+    if entry is None:
         raise ValueError(f"Unknown model: {model_name}")
 
-    entry = MODEL_CATALOG[model_name]
     api_key_env = entry["api_key_env"]
     api_key = get_api_key_for_provider(api_key_env, api_keys=api_keys)
 
@@ -253,10 +293,12 @@ def get_role_model(role: str, config: Optional[RunnableConfig] = None) -> BaseCh
     kwargs = resolve_model_config(model_name, role=role, api_keys=api_keys)
 
     if not kwargs.get("api_key"):
-        entry = MODEL_CATALOG[model_name]
+        entry = _lookup_catalog_entry(model_name) or {}
+        provider = entry.get("provider", "unknown")
+        env_name = entry.get("api_key_env", "unknown")
         raise ValueError(
             f"Missing API key for model '{model_name}' (provider "
-            f"'{entry['provider']}', env {entry['api_key_env']}). "
+            f"'{provider}', env {env_name}). "
             "Please provide it in the frontend settings or set it in the "
             "backend .env."
         )
