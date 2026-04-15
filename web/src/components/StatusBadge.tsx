@@ -3,7 +3,7 @@ import type { SessionStatus } from '@/api/types';
 const STYLES: Record<SessionStatus, { bg: string; color: string; label: string }> = {
   created: { bg: '#55555518', color: '#888888', label: 'Created' },
   active: { bg: '#FFB80018', color: '#FFB800', label: 'Running' },
-  clarification_needed: { bg: '#FF6B0018', color: '#FF6B00', label: 'Clarify' },
+  clarification_needed: { bg: '#FF6B6B18', color: '#FF6B6B', label: 'Clarify' },
   completed: { bg: '#00FF0018', color: '#00FF00', label: 'Completed' },
   failed: { bg: '#EF444418', color: '#EF4444', label: 'Failed' },
   expired: { bg: '#44444418', color: '#666666', label: 'Expired' },
