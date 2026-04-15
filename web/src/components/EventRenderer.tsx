@@ -33,7 +33,6 @@ export function EventRenderer({ event }: { event: ResearchEvent }) {
     case 'AI':
     case 'ResearchQuestion':
     case 'System':
-    case 'Other':
     default:
       return <SimpleBlock event={event} />;
   }
