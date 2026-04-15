@@ -1271,18 +1271,12 @@
                   "id": "mr2RG",
                   "name": "msg2",
                   "width": "fill_container",
-                  "fill": "#0C1A0C",
-                  "cornerRadius": 10,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#00FF0025"
-                  },
+                  "fill": "#00000000",
                   "layout": "vertical",
-                  "gap": 10,
+                  "gap": 6,
                   "padding": [
-                    16,
-                    18
+                    8,
+                    4
                   ],
                   "children": [
                     {
@@ -1291,16 +1285,27 @@
                       "name": "msg2Header",
                       "width": "fill_container",
                       "gap": 8,
+                      "justifyContent": "end",
                       "alignItems": "center",
                       "children": [
+                        {
+                          "type": "text",
+                          "id": "MDzt7",
+                          "name": "msg2Label",
+                          "fill": "#00FF0080",
+                          "content": "YOU",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "600"
+                        },
                         {
                           "type": "frame",
                           "id": "1TvUt",
                           "name": "avatar",
-                          "width": 18,
-                          "height": 18,
+                          "width": 16,
+                          "height": 16,
                           "fill": "#00FF0015",
-                          "cornerRadius": 9,
+                          "cornerRadius": 8,
                           "justifyContent": "center",
                           "alignItems": "center",
                           "children": [
@@ -1308,65 +1313,11 @@
                               "type": "icon_font",
                               "id": "zLjti",
                               "name": "userIcon",
-                              "width": 10,
-                              "height": 10,
+                              "width": 9,
+                              "height": 9,
                               "iconFontName": "user",
                               "iconFontFamily": "lucide",
                               "fill": "#00FF00"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "MDzt7",
-                          "name": "msg2Label",
-                          "fill": "#00FF00",
-                          "content": "YOU",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 11,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "xjyBH",
-                          "name": "msg2Spacer",
-                          "width": "fill_container",
-                          "height": 1
-                        },
-                        {
-                          "type": "frame",
-                          "id": "ekqAN",
-                          "name": "copyBtn",
-                          "cornerRadius": 6,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "#444444"
-                          },
-                          "gap": 4,
-                          "padding": [
-                            4,
-                            10
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "pPiYt",
-                              "width": 11,
-                              "height": 11,
-                              "iconFontName": "copy",
-                              "iconFontFamily": "lucide",
-                              "fill": "#888888"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Y80Wn",
-                              "fill": "#888888",
-                              "content": "Copy",
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 10,
-                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -1376,14 +1327,16 @@
                       "type": "text",
                       "id": "aR7Xc",
                       "name": "msg2Content",
-                      "fill": "#CCCCCC",
+                      "fill": "#FFFFFF",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
                       "content": "dime las mejores cafeterías de Rivas-Vaciamadrid para teletrabajar, con buena conexión wifi y enchufes",
-                      "lineHeight": 1.4,
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
                       "fontFamily": "Geist",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
+                      "fontSize": 15,
+                      "fontWeight": "500",
+                      "fontStyle": "italic"
                     }
                   ]
                 },
@@ -2506,105 +2459,72 @@
                   "id": "GZL6x",
                   "name": "Collapsed PRO",
                   "width": "fill_container",
-                  "fill": "#0C1A0C",
-                  "cornerRadius": 10,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "#00FF0025"
-                  },
-                  "gap": 10,
+                  "fill": "#00000000",
+                  "layout": "vertical",
+                  "gap": 6,
                   "padding": [
-                    10,
-                    14
+                    8,
+                    4
                   ],
-                  "alignItems": "center",
+                  "alignItems": "end",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "8Jy14",
-                      "name": "User Avatar",
-                      "width": 18,
-                      "height": 18,
-                      "fill": "#00FF0015",
-                      "cornerRadius": 9,
-                      "justifyContent": "center",
+                      "id": "KoeOR",
+                      "name": "YOU Header",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "justifyContent": "end",
                       "alignItems": "center",
                       "children": [
                         {
-                          "type": "icon_font",
-                          "id": "5mGvn",
-                          "width": 10,
-                          "height": 10,
-                          "iconFontName": "user",
-                          "iconFontFamily": "lucide",
-                          "fill": "#00FF00"
+                          "type": "text",
+                          "id": "yJLwC",
+                          "name": "b2label",
+                          "fill": "#00FF0080",
+                          "content": "YOU",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 10,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "8Jy14",
+                          "name": "User Avatar",
+                          "width": 16,
+                          "height": 16,
+                          "fill": "#00FF0015",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "5mGvn",
+                              "width": 9,
+                              "height": 9,
+                              "iconFontName": "user",
+                              "iconFontFamily": "lucide",
+                              "fill": "#00FF00"
+                            }
+                          ]
                         }
                       ]
                     },
                     {
                       "type": "text",
-                      "id": "yJLwC",
-                      "name": "b2label",
-                      "fill": "#00FF00",
-                      "content": "YOU",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 11,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Nf4Kd",
-                      "name": "b2spacer",
+                      "id": "r1iwy",
+                      "name": "youText",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "height": 1
-                    },
-                    {
-                      "type": "frame",
-                      "id": "1LA0A",
-                      "name": "Copy Btn",
-                      "cornerRadius": 6,
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": 1,
-                        "fill": "#444444"
-                      },
-                      "gap": 4,
-                      "padding": [
-                        4,
-                        10
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "zf5nk",
-                          "width": 11,
-                          "height": 11,
-                          "iconFontName": "copy",
-                          "iconFontFamily": "lucide",
-                          "fill": "#888888"
-                        },
-                        {
-                          "type": "text",
-                          "id": "YxigB",
-                          "fill": "#888888",
-                          "content": "Copy",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 10,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "icon_font",
-                      "id": "qNqYt",
-                      "name": "b2chevron",
-                      "width": 14,
-                      "height": 14,
-                      "iconFontName": "chevron-down",
-                      "iconFontFamily": "lucide",
-                      "fill": "#444444"
+                      "content": "dime las mejores cafeterías de Rivas-Vaciamadrid para teletrabajar, con buena conexión wifi y enchufes",
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
+                      "fontFamily": "Geist",
+                      "fontSize": 15,
+                      "fontWeight": "500",
+                      "fontStyle": "italic"
                     }
                   ]
                 },
