@@ -59,6 +59,7 @@ export function ChatView({ session, events }: ChatViewProps) {
   const stickToBottomRef = useRef(true);
   const upsertSession = useSessionStore((s) => s.upsertSession);
   const setActive = useSessionStore((s) => s.setActiveSession);
+  const apiKeys = useSessionStore((s) => s.apiKeys);
 
   useEffect(() => {
     stickToBottomRef.current = true;
@@ -77,7 +78,14 @@ export function ChatView({ session, events }: ChatViewProps) {
   };
 
   const handleClarify = async (clarification: string) => {
-    await api.clarify(session.id, clarification);
+    const nonEmpty = Object.fromEntries(
+      Object.entries(apiKeys).filter(([, v]) => v && v.trim().length > 0),
+    );
+    await api.clarify(
+      session.id,
+      clarification,
+      Object.keys(nonEmpty).length > 0 ? nonEmpty : undefined,
+    );
     const updated = {
       ...session,
       status: 'active' as const,

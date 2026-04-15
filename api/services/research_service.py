@@ -9,6 +9,7 @@ message history.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Any, Dict, Optional
 
 from langchain_core.messages import HumanMessage
@@ -36,12 +37,47 @@ def _get_writer_builder():
     return writer_builder
 
 
+_PENDING_API_KEY_TTL_SECONDS = 300
+
+
 class ResearchService:
     """Executes research runs and records their outputs."""
+
+    # Class-level dict so all ResearchService() instances share the same
+    # in-memory stash. Keys are session_ids; values are (timestamp, api_keys).
+    # Never written to disk. Never logged.
+    _pending_api_keys: Dict[str, tuple] = {}
 
     def __init__(self) -> None:
         self.checkpointer_manager = get_checkpointer_manager()
         self.event_service = get_event_service()
+
+    @classmethod
+    def stash_api_keys(cls, session_id: str, api_keys: Dict[str, str]) -> None:
+        """Park user-provided API keys in memory until the research bg task picks them up."""
+        cls._cleanup_expired_api_keys()
+        cls._pending_api_keys[session_id] = (time.monotonic(), dict(api_keys))
+
+    @classmethod
+    def pop_api_keys(cls, session_id: str) -> Optional[Dict[str, str]]:
+        """Retrieve and remove parked API keys for ``session_id``."""
+        entry = cls._pending_api_keys.pop(session_id, None)
+        if entry is None:
+            return None
+        _, api_keys = entry
+        return api_keys
+
+    @classmethod
+    def _cleanup_expired_api_keys(cls) -> None:
+        """Drop parked keys older than the TTL — defense in depth."""
+        now = time.monotonic()
+        stale = [
+            sid
+            for sid, (ts, _) in cls._pending_api_keys.items()
+            if now - ts > _PENDING_API_KEY_TTL_SECONDS
+        ]
+        for sid in stale:
+            cls._pending_api_keys.pop(sid, None)
 
     async def start_research(
         self,
@@ -49,6 +85,8 @@ class ResearchService:
         thread_id: str,
         user_message: str,
         db: Optional[AsyncSession] = None,
+        models_config: Optional[Dict[str, str]] = None,
+        api_keys: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Start a new research session for ``user_message``."""
         if db is not None:
@@ -63,7 +101,13 @@ class ResearchService:
         )
 
         agent = _get_writer_builder().compile(checkpointer=self.checkpointer_manager.get_checkpointer())
-        config = {"configurable": {"thread_id": thread_id}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "models": models_config or {},
+                "api_keys": api_keys or {},
+            }
+        }
 
         try:
             with set_session_context(session_id):
@@ -90,6 +134,8 @@ class ResearchService:
         thread_id: str,
         clarification: str,
         db: Optional[AsyncSession] = None,
+        models_config: Optional[Dict[str, str]] = None,
+        api_keys: Optional[Dict[str, str]] = None,
     ) -> Dict[str, Any]:
         """Resume a paused research run after the user clarifies."""
         if db is not None:
@@ -98,7 +144,13 @@ class ResearchService:
         # Same thread_id => LangGraph resumes from the checkpointed state and
         # merges the new HumanMessage into the existing message list.
         agent = _get_writer_builder().compile(checkpointer=self.checkpointer_manager.get_checkpointer())
-        config = {"configurable": {"thread_id": thread_id}}
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "models": models_config or {},
+                "api_keys": api_keys or {},
+            }
+        }
 
         try:
             with set_session_context(session_id):

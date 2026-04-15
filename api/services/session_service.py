@@ -7,7 +7,7 @@ from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
-from typing import Optional, List
+from typing import Dict, Optional, List
 
 from api.database.models import Message, ResearchEvent, Session, SessionStatus
 
@@ -23,6 +23,9 @@ class SessionService:
         initial_query: str,
         max_iterations: int = 6,
         max_concurrent_researchers: int = 3,
+        models_config: Optional[Dict[str, str]] = None,
+        user_name: Optional[str] = None,
+        user_email: Optional[str] = None,
     ) -> Session:
         """Create a new research session"""
         session = Session(
@@ -32,6 +35,9 @@ class SessionService:
             status=SessionStatus.CREATED,
             max_iterations=max_iterations,
             max_concurrent_researchers=max_concurrent_researchers,
+            models_config=models_config,
+            user_name=user_name,
+            user_email=user_email,
         )
         self.db.add(session)
         await self.db.commit()

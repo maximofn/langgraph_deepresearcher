@@ -77,12 +77,33 @@ export interface Session {
   completed_at: string | null;
   max_iterations: number;
   max_concurrent_researchers: number;
+  user_name?: string | null;
+  user_email?: string | null;
 }
+
+export type ApiKeysMap = Record<string, string>;
 
 export interface CreateSessionRequest {
   query: string;
   max_iterations?: number;
   max_concurrent_researchers?: number;
+  models?: Record<string, string>;
+  api_keys?: ApiKeysMap;
+  user_name?: string;
+  user_email?: string;
+}
+
+export interface ModelInfo {
+  name: string;
+  label: string;
+  provider: string;
+  api_key_env: string;
+}
+
+export interface ModelsCatalogResponse {
+  models: ModelInfo[];
+  defaults: Record<string, string>;
+  roles: string[];
 }
 
 export interface CreateSessionResponse {

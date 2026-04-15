@@ -19,6 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from api.config import settings
 from api.database.checkpointer import get_checkpointer_manager
 from api.database.db import init_db
+from api.routes import models as models_route
 from api.routes import sessions, websocket
 from api.utils.exceptions import APIException, ErrorResponse
 from api.utils.logging import configure_logging
@@ -110,12 +111,26 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
+    # Pydantic v2's ``exc.errors()`` may include a non-serializable ``ctx``
+    # entry (e.g. the raw ``ValueError`` raised by a ``field_validator``). We
+    # strip it so the response can always be JSON-encoded.
+    safe_errors = []
+    for err in exc.errors():
+        safe = {k: v for k, v in err.items() if k != "ctx"}
+        ctx = err.get("ctx")
+        if isinstance(ctx, dict):
+            safe["ctx"] = {
+                k: (str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v)
+                for k, v in ctx.items()
+            }
+        safe_errors.append(safe)
+
     return JSONResponse(
         status_code=422,
         content=ErrorResponse(
             code="validation_error",
             message="Request validation failed",
-            details={"errors": exc.errors()},
+            details={"errors": safe_errors},
         ).model_dump(),
     )
 
@@ -140,6 +155,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 # ---------- Routers ----------
 app.include_router(sessions.router)
+app.include_router(models_route.router)
 app.include_router(websocket.router)
 
 

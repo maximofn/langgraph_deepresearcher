@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,12 +36,16 @@ async def _run_research_bg(session_id: str) -> None:
             logger.error("Background task: session %s vanished", session_id)
             return
 
+        api_keys = ResearchService.pop_api_keys(session_id)
+
         try:
             result = await research_service.start_research(
                 session_id=session.id,
                 thread_id=session.thread_id,
                 user_message=session.initial_query,
                 db=db_session,
+                models_config=session.models_config,
+                api_keys=api_keys,
             )
 
             if result["needs_clarification"]:
@@ -58,7 +62,11 @@ async def _run_research_bg(session_id: str) -> None:
             await svc.update_session_status(session_id, SessionStatus.FAILED)
 
 
-async def _continue_research_bg(session_id: str, clarification: str) -> None:
+async def _continue_research_bg(
+    session_id: str,
+    clarification: str,
+    api_keys: Optional[dict] = None,
+) -> None:
     """Background task: resume a paused research run with the user's clarification."""
     research_service = ResearchService()
     async with db_session_context() as db_session:
@@ -74,6 +82,8 @@ async def _continue_research_bg(session_id: str, clarification: str) -> None:
                 thread_id=session.thread_id,
                 clarification=clarification,
                 db=db_session,
+                models_config=session.models_config,
+                api_keys=api_keys,
             )
             await svc.update_session_status(
                 session_id,
@@ -97,7 +107,16 @@ async def create_session(
         initial_query=request.query,
         max_iterations=request.max_iterations,
         max_concurrent_researchers=request.max_concurrent_researchers,
+        models_config=request.models,
+        user_name=request.user_name,
+        user_email=request.user_email,
     )
+
+    # User-supplied API keys are parked in memory keyed by session id and
+    # consumed by the background task when research starts. They are NEVER
+    # persisted to the database or to logs.
+    if request.api_keys:
+        ResearchService.stash_api_keys(session.id, request.api_keys)
 
     return CreateSessionResponse(
         session=SessionResponse.model_validate(session),
@@ -155,7 +174,9 @@ async def provide_clarification(
         SessionStatus.ACTIVE,
         clarification_response=request.clarification,
     )
-    background_tasks.add_task(_continue_research_bg, session_id, request.clarification)
+    background_tasks.add_task(
+        _continue_research_bg, session_id, request.clarification, request.api_keys
+    )
 
     return StartResearchResponse(
         status="continued",

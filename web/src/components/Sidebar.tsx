@@ -14,7 +14,10 @@ const STATUS_FILTERS: Array<{ value: 'all' | SessionStatus; label: string }> = [
   { value: 'completed', label: 'Completed' },
 ];
 
-const USER = { name: 'Maximo', email: 'maximo@example.com', initial: 'M' };
+function deriveInitial(name: string, email: string): string {
+  const src = (name || email || '?').trim();
+  return src.charAt(0).toUpperCase() || '?';
+}
 
 function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -33,11 +36,13 @@ function formatRelative(iso: string): string {
 
 interface SidebarProps {
   onNewResearch: () => void;
+  onOpenPreferences: () => void;
 }
 
-export function Sidebar({ onNewResearch }: SidebarProps) {
+export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
   const sessions = useSessionStore((s) => s.sessions);
   const removeSession = useSessionStore((s) => s.removeSession);
+  const userInfo = useSessionStore((s) => s.userInfo);
   const { pathname } = useLocation();
   const activeId = pathname.startsWith('/session/') ? pathname.split('/')[2] : undefined;
   const navigate = useNavigate();
@@ -179,18 +184,20 @@ export function Sidebar({ onNewResearch }: SidebarProps) {
       <div className="flex items-center gap-3 border-t border-[#1E1E1E] px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00FF0015]">
           <span className="font-sans text-sm font-semibold text-[#00FF00]">
-            {USER.initial}
+            {deriveInitial(userInfo.name, userInfo.email)}
           </span>
         </div>
         <div className="min-w-0 flex-1">
           <div className="truncate font-sans text-[13px] font-medium text-[#DDDDDD]">
-            {USER.name}
+            {userInfo.name || 'Set your name'}
           </div>
           <div className="truncate font-mono text-[11px] text-[#444444]">
-            {USER.email}
+            {userInfo.email || 'Set your email'}
           </div>
         </div>
         <button
+          type="button"
+          onClick={onOpenPreferences}
           className="rounded p-1 text-[#555555] hover:text-[#CCCCCC]"
           title="Settings"
         >

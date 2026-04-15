@@ -3,7 +3,7 @@ Response models for the API.
 """
 
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
+from typing import Dict, Optional, List
 from datetime import datetime
 
 from api.database.models import SessionStatus
@@ -26,6 +26,9 @@ class SessionResponse(BaseModel):
     completed_at: Optional[datetime] = None
     max_iterations: int
     max_concurrent_researchers: int
+    models_config: Optional[Dict[str, str]] = None
+    user_name: Optional[str] = None
+    user_email: Optional[str] = None
 
 
 class CreateSessionResponse(BaseModel):

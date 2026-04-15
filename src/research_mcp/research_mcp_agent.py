@@ -34,10 +34,9 @@ from research.research_prompts import compress_research_system_prompt, compress_
 
 from utils.today import get_today_str
 from utils.message_utils import format_messages
-from utils.initialize_model import initialize_model
 
-from LLM_models.LLM_models import RESEARCH_MODEL_NAME, RESEARCH_MODEL_PROVIDER, RESEARCH_MODEL_TEMPERATURE, RESEARCH_MODEL_BASE_URL, RESEARCH_MODEL_PROVIDER_API_KEY, RESEARCH_MODEL_MAX_TOKENS
-from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, COMPRESS_MODEL_TEMPERATURE, COMPRESS_MODEL_BASE_URL, COMPRESS_MODEL_PROVIDER_API_KEY, COMPRESS_MODEL_MAX_TOKENS
+from LLM_models.model_catalog import get_role_model
+from langchain_core.runnables import RunnableConfig
 
 # ===== CONFIGURATION =====
 
@@ -64,27 +63,9 @@ def get_mcp_client():
         _client = MultiServerMCPClient(mcp_config)
     return _client
 
-# Initialize models
-compress_model = initialize_model(
-    model_name=COMPRESS_MODEL_NAME, 
-    model_provider=COMPRESS_MODEL_PROVIDER, 
-    base_url=COMPRESS_MODEL_BASE_URL, 
-    temperature=COMPRESS_MODEL_TEMPERATURE,
-    api_key=COMPRESS_MODEL_PROVIDER_API_KEY,
-    max_tokens=COMPRESS_MODEL_MAX_TOKENS
-)
-model = initialize_model(
-    model_name=RESEARCH_MODEL_NAME,
-    model_provider=RESEARCH_MODEL_PROVIDER,
-    base_url=RESEARCH_MODEL_BASE_URL,
-    temperature=RESEARCH_MODEL_TEMPERATURE,
-    api_key=RESEARCH_MODEL_PROVIDER_API_KEY,
-    max_tokens=RESEARCH_MODEL_MAX_TOKENS
-)
-
 # ===== AGENT NODES =====
 
-async def llm_call(state: ResearcherState):
+async def llm_call(state: ResearcherState, config: RunnableConfig):
     """Analyze current state and decide on tool usage with MCP integration.
 
     This node:
@@ -103,8 +84,8 @@ async def llm_call(state: ResearcherState):
         # Use MCP tools for local document access
         tools = mcp_tools + [think_tool]
 
-        # Initialize model with tool binding
-        model_with_tools = model.bind_tools(tools)
+        # Build the per-session research model from RunnableConfig and bind tools
+        model_with_tools = get_role_model("research", config).bind_tools(tools)
         
         # Show progress bar while waiting for LLM response
         print("⏳ MCP Researcher agent:")
@@ -226,7 +207,7 @@ async def tool_node(state: ResearcherState):
         # Re-raise the exception to let the caller handle it
         raise
 
-def compress_research(state: ResearcherState) -> dict:
+def compress_research(state: ResearcherState, config: RunnableConfig) -> dict:
     """Compress research findings into a concise summary.
 
     Takes all the research messages and tool outputs and creates
@@ -237,6 +218,9 @@ def compress_research(state: ResearcherState) -> dict:
     """
     
     try:
+        # Build the per-session compress model from RunnableConfig
+        compress_model = get_role_model("compress", config)
+
         system_message = compress_research_system_prompt.format(date=get_today_str())
         messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
 

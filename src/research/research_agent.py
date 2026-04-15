@@ -16,12 +16,11 @@ from langchain.chat_models import init_chat_model
 from research.research_state import ResearcherState, ResearcherOutputState, tavily_search, think_tool
 from utils.today import get_today_str
 from utils.message_utils import format_messages
-from utils.initialize_model import initialize_model
 from utils.progress_bar import safe_progress_bar
 from research.research_prompts import research_agent_prompt, compress_research_system_prompt, compress_research_human_message
 
-from LLM_models.LLM_models import RESEARCH_MODEL_NAME, RESEARCH_MODEL_PROVIDER, RESEARCH_MODEL_TEMPERATURE, RESEARCH_MODEL_BASE_URL, RESEARCH_MODEL_PROVIDER_API_KEY, RESEARCH_MODEL_MAX_TOKENS
-from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, COMPRESS_MODEL_TEMPERATURE, COMPRESS_MODEL_BASE_URL, COMPRESS_MODEL_PROVIDER_API_KEY, COMPRESS_MODEL_MAX_TOKENS
+from LLM_models.model_catalog import get_role_model
+from langchain_core.runnables import RunnableConfig
 
 # ===== CONFIGURATION =====
 
@@ -29,28 +28,9 @@ from LLM_models.LLM_models import COMPRESS_MODEL_NAME, COMPRESS_MODEL_PROVIDER, 
 tools = [tavily_search, think_tool]
 tools_by_name = {tool.name: tool for tool in tools}
 
-# Initialize models
-research_model = initialize_model(
-    model_name=RESEARCH_MODEL_NAME,
-    model_provider=RESEARCH_MODEL_PROVIDER,
-    base_url=RESEARCH_MODEL_BASE_URL,
-    temperature=RESEARCH_MODEL_TEMPERATURE,
-    api_key=RESEARCH_MODEL_PROVIDER_API_KEY,
-    max_tokens=RESEARCH_MODEL_MAX_TOKENS
-)
-research_model_with_tools = research_model.bind_tools(tools)
-compress_model = initialize_model(
-    model_name=COMPRESS_MODEL_NAME, 
-    model_provider=COMPRESS_MODEL_PROVIDER, 
-    base_url=COMPRESS_MODEL_BASE_URL, 
-    temperature=COMPRESS_MODEL_TEMPERATURE,
-    api_key=COMPRESS_MODEL_PROVIDER_API_KEY,
-    max_tokens=COMPRESS_MODEL_MAX_TOKENS
-)
-
 # ===== AGENT NODES =====
 
-def llm_call(state: ResearcherState):
+def llm_call(state: ResearcherState, config: RunnableConfig):
     """Analyze current state and decide on next actions.
     
     The model analyzes the current conversation state and decides whether to:
@@ -61,6 +41,9 @@ def llm_call(state: ResearcherState):
     """
     
     try:
+        # Build the per-session research model from RunnableConfig
+        research_model_with_tools = get_role_model("research", config).bind_tools(tools)
+
         # Show progress bar while waiting for LLM response
         print("⏳ Researcher agent:")
         if isinstance(state.get('researcher_messages', [])[-1], HumanMessage):
@@ -96,7 +79,7 @@ def llm_call(state: ResearcherState):
         # Re-raise the exception to let the caller handle it
         raise
 
-def tool_node(state: ResearcherState):
+def tool_node(state: ResearcherState, config: RunnableConfig):
     """Execute all tool calls from the previous LLM response.
     
     Executes all tool calls from the previous LLM responses.
@@ -119,7 +102,7 @@ def tool_node(state: ResearcherState):
         for tool_call in tool_calls:
             with safe_progress_bar(monitor=False, stats=False, title=f"", spinner='dots_waves', bar='blocks') as bar:
                 tool = tools_by_name[tool_call["name"]]
-                observation = tool.invoke(tool_call["args"])
+                observation = tool.invoke(tool_call["args"], config=config)
                 observations.append(observation)
                 bar()
             
@@ -158,14 +141,17 @@ def tool_node(state: ResearcherState):
         # Re-raise the exception to let the caller handle it
         raise
 
-def compress_research(state: ResearcherState) -> dict:
+def compress_research(state: ResearcherState, config: RunnableConfig) -> dict:
     """Compress research findings into a concise summary.
-    
+
     Takes all the research messages and tool outputs and creates
     a compressed summary suitable for the supervisor's decision-making.
     """
-    
+
     try:
+        # Build the per-session compress model from RunnableConfig
+        compress_model = get_role_model("compress", config)
+
         system_message = compress_research_system_prompt.format(date=get_today_str())
         messages = [SystemMessage(content=system_message)] + state.get("researcher_messages", []) + [HumanMessage(content=compress_research_human_message)]
 

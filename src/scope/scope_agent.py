@@ -28,26 +28,14 @@ from scope.scope_prompts import clarify_with_user_instructions, transform_messag
 from scope.scope_state import AgentState, AgentInputState, ClarifyWithUser, ResearchQuestion
 
 from utils.today import get_today_str
-from utils.initialize_model import initialize_model
-from LLM_models.LLM_models import SCOPE_MODEL_NAME, SCOPE_MODEL_PROVIDER, SCOPE_MODEL_TEMPERATURE, SCOPE_MODEL_BASE_URL, SCOPE_MODEL_PROVIDER_API_KEY, SCOPE_MODEL_MAX_TOKENS
+from LLM_models.model_catalog import get_role_model
+from langchain_core.runnables import RunnableConfig
 
 from utils.message_utils import format_messages
 
-# ===== CONFIGURATION =====
-
-# Initialize model
-scope_model = initialize_model(
-    model_name=SCOPE_MODEL_NAME,
-    model_provider=SCOPE_MODEL_PROVIDER,
-    base_url=SCOPE_MODEL_BASE_URL,
-    temperature=SCOPE_MODEL_TEMPERATURE,
-    api_key=SCOPE_MODEL_PROVIDER_API_KEY,
-    max_tokens=SCOPE_MODEL_MAX_TOKENS
-)
-
 # ===== WORKFLOW NODES =====
 
-def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brief", "__end__"]]:
+def clarify_with_user(state: AgentState, config: RunnableConfig) -> Command[Literal["write_research_brief", "__end__"]]:
     """
     Determine if the user's request contains sufficient information to proceed with research.
     
@@ -58,6 +46,9 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
     try:
         print("⏳ Scope agent:")
         format_messages([state.get("messages", [])[-1]], title="Real Human Message", msg_subtype='RealHumanMessage')
+
+        # Build the per-session scope model from RunnableConfig
+        scope_model = get_role_model("scope", config)
 
         # Set up structured output model
         structured_output_model = scope_model.with_structured_output(ClarifyWithUser)
@@ -113,15 +104,18 @@ def clarify_with_user(state: AgentState) -> Command[Literal["write_research_brie
         # Re-raise the exception to let the caller handle it
         raise
 
-def write_research_brief(state: AgentState):
+def write_research_brief(state: AgentState, config: RunnableConfig):
     """
     Transform the conversation history into a comprehensive research brief.
-    
+
     Uses structured output to ensure the brief follows the required format
     and contains all necessary details for effective research.
     """
-    
+
     try:
+        # Build the per-session scope model from RunnableConfig
+        scope_model = get_role_model("scope", config)
+
         # Set up structured output model
         structured_output_model = scope_model.with_structured_output(ResearchQuestion)
 

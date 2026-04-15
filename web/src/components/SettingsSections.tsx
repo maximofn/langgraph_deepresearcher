@@ -1,0 +1,252 @@
+import { useState } from 'react';
+import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { useSessionStore } from '@/state/sessionStore';
+
+export function UserInfoSection() {
+  const userInfo = useSessionStore((s) => s.userInfo);
+  const setUserInfo = useSessionStore((s) => s.setUserInfo);
+
+  const handleChange = (field: 'name' | 'email', value: string) => {
+    setUserInfo({ ...userInfo, [field]: value });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <label
+        className="font-mono font-medium tracking-widest"
+        style={{ fontSize: '11px', color: '#888888' }}
+      >
+        YOUR INFO
+      </label>
+      <div
+        className="text-[11px]"
+        style={{ color: '#666666', lineHeight: '1.4' }}
+      >
+        Used to deliver the final research report to your inbox when the
+        investigation completes. Leave blank if you don't want an email.
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="flex flex-col gap-1">
+          <span style={{ fontSize: '12px', color: '#AAAAAA' }}>Name</span>
+          <input
+            type="text"
+            value={userInfo.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            placeholder="Your name"
+            autoComplete="name"
+            className="w-full rounded-[8px] px-3 py-2 outline-none"
+            style={{
+              background: '#0A0A0A',
+              border: '1px solid #222222',
+              color: '#ffffff',
+              fontSize: '13px',
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span style={{ fontSize: '12px', color: '#AAAAAA' }}>Email</span>
+          <input
+            type="email"
+            value={userInfo.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            spellCheck={false}
+            className="w-full rounded-[8px] px-3 py-2 outline-none"
+            style={{
+              background: '#0A0A0A',
+              border: '1px solid #222222',
+              color: '#ffffff',
+              fontSize: '13px',
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface ProviderField {
+  env: string;
+  label: string;
+  placeholder: string;
+}
+
+const PROVIDER_FIELDS: ProviderField[] = [
+  { env: 'OPENAI_API_KEY', label: 'OpenAI', placeholder: 'sk-...' },
+  { env: 'ANTHROPIC_API_KEY', label: 'Anthropic', placeholder: 'sk-ant-...' },
+  { env: 'GEMINI_API_KEY', label: 'Google Gemini', placeholder: 'AIza...' },
+  { env: 'KIMI_K2_API_KEY', label: 'Moonshot Kimi K2', placeholder: 'sk-...' },
+  { env: 'CEREBRAS_API_KEY', label: 'Cerebras', placeholder: 'csk-...' },
+  { env: 'GITHUB_API_KEY', label: 'GitHub Models', placeholder: 'ghp_...' },
+];
+
+const ROLE_LABELS: Record<string, string> = {
+  scope: 'Scope',
+  supervisor: 'Supervisor',
+  research: 'Research',
+  compress: 'Compress',
+  summarization: 'Summarization',
+  writer: 'Writer',
+};
+
+export function ApiKeysSection() {
+  const apiKeys = useSessionStore((s) => s.apiKeys);
+  const setApiKeys = useSessionStore((s) => s.setApiKeys);
+  const [revealedKeys, setRevealedKeys] = useState<Record<string, boolean>>({});
+
+  const handleApiKeyChange = (env: string, value: string) => {
+    const next = { ...apiKeys, [env]: value };
+    if (!value) delete next[env];
+    setApiKeys(next);
+  };
+
+  const handleClearApiKeys = () => {
+    setApiKeys({});
+    setRevealedKeys({});
+  };
+
+  const toggleReveal = (env: string) => {
+    setRevealedKeys({ ...revealedKeys, [env]: !revealedKeys[env] });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <label
+          className="font-mono font-medium tracking-widest"
+          style={{ fontSize: '11px', color: '#888888' }}
+        >
+          API KEYS
+        </label>
+        <button
+          type="button"
+          onClick={handleClearApiKeys}
+          className="flex items-center gap-1 transition-opacity hover:opacity-70"
+          style={{ fontSize: '11px', color: '#888888' }}
+        >
+          <Trash2 size={11} />
+          Clear all
+        </button>
+      </div>
+      <div
+        className="text-[11px]"
+        style={{ color: '#666666', lineHeight: '1.4' }}
+      >
+        Stored in your browser only. Sent over HTTPS with each research
+        request and never persisted on the server.
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {PROVIDER_FIELDS.map(({ env, label, placeholder }) => {
+          const revealed = revealedKeys[env] ?? false;
+          const value = apiKeys[env] ?? '';
+          return (
+            <div key={env} className="flex flex-col gap-1">
+              <span style={{ fontSize: '12px', color: '#AAAAAA' }}>
+                {label}
+              </span>
+              <div
+                className="flex items-center rounded-[8px]"
+                style={{
+                  background: '#0A0A0A',
+                  border: '1px solid #222222',
+                }}
+              >
+                <input
+                  type={revealed ? 'text' : 'password'}
+                  value={value}
+                  onChange={(e) => handleApiKeyChange(env, e.target.value)}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="w-full bg-transparent px-3 py-2 outline-none"
+                  style={{ fontSize: '13px', color: '#ffffff' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleReveal(env)}
+                  className="px-2 transition-opacity hover:opacity-70"
+                  style={{ color: '#666666' }}
+                  tabIndex={-1}
+                  aria-label={revealed ? 'Hide key' : 'Show key'}
+                >
+                  {revealed ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export function ModelsSection() {
+  const modelsCatalog = useSessionStore((s) => s.modelsCatalog);
+  const selectedModels = useSessionStore((s) => s.selectedModels);
+  const setSelectedModels = useSessionStore((s) => s.setSelectedModels);
+  const apiKeys = useSessionStore((s) => s.apiKeys);
+
+  const catalogLoaded = modelsCatalog !== null;
+  const availableModels = modelsCatalog?.models ?? [];
+  const roles = modelsCatalog?.roles ?? [];
+
+  const filledEnvs = new Set(
+    Object.entries(apiKeys)
+      .filter(([, v]) => v && v.trim().length > 0)
+      .map(([k]) => k),
+  );
+
+  const handleModelChange = (role: string, modelName: string) => {
+    setSelectedModels({ ...selectedModels, [role]: modelName });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <label
+        className="font-mono font-medium tracking-widest"
+        style={{ fontSize: '11px', color: '#888888' }}
+      >
+        MODELS PER AGENT
+      </label>
+      {!catalogLoaded ? (
+        <div style={{ fontSize: '12px', color: '#666666' }}>Loading models…</div>
+      ) : availableModels.length === 0 ? (
+        <div style={{ fontSize: '12px', color: '#CC6666' }}>
+          No models available.
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {roles.map((role) => (
+            <div key={role} className="flex flex-col gap-1">
+              <span style={{ fontSize: '12px', color: '#AAAAAA' }}>
+                {ROLE_LABELS[role] ?? role}
+              </span>
+              <select
+                value={selectedModels[role] ?? ''}
+                onChange={(e) => handleModelChange(role, e.target.value)}
+                className="w-full rounded-[8px] px-3 py-2 outline-none"
+                style={{
+                  background: '#0A0A0A',
+                  border: '1px solid #222222',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                }}
+              >
+                {availableModels.map((m) => {
+                  const hasKey = filledEnvs.has(m.api_key_env);
+                  return (
+                    <option key={m.name} value={m.name}>
+                      {m.label}
+                      {hasKey ? '' : ' (missing key)'}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

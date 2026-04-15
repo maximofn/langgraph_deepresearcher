@@ -11,15 +11,14 @@ from pydantic import BaseModel, Field
 
 from langchain_core.messages import BaseMessage, HumanMessage
 from langgraph.graph.message import add_messages
-from langchain.chat_models import init_chat_model 
 from langchain_core.tools import tool, InjectedToolArg
+from langchain_core.runnables import RunnableConfig
 from tavily import TavilyClient
 
 from research.research_prompts import summarize_webpage_prompt
-from LLM_models.LLM_models import SUMMARIZATION_MODEL_NAME, SUMMARIZATION_MODEL_PROVIDER, SUMMARIZATION_MODEL_TEMPERATURE, SUMMARIZATION_MODEL_BASE_URL, SUMMARIZATION_MODEL_PROVIDER_API_KEY, SUMMARIZATION_MODEL_MAX_TOKENS
+from LLM_models.model_catalog import get_role_model
 
 from utils.today import get_today_str
-from utils.initialize_model import initialize_model
 
 from dotenv import load_dotenv
 import os
@@ -55,15 +54,6 @@ class ResearcherOutputState(TypedDict):
     raw_notes: Annotated[List[str], operator.add]
     researcher_messages: Annotated[Sequence[BaseMessage], add_messages]
 
-summarization_model = initialize_model(
-    model_name=SUMMARIZATION_MODEL_NAME, 
-    model_provider=SUMMARIZATION_MODEL_PROVIDER, 
-    base_url=SUMMARIZATION_MODEL_BASE_URL, 
-    temperature=SUMMARIZATION_MODEL_TEMPERATURE,
-    api_key=SUMMARIZATION_MODEL_PROVIDER_API_KEY,
-    max_tokens=SUMMARIZATION_MODEL_MAX_TOKENS
-)
-
 # ===== STRUCTURED OUTPUT SCHEMAS =====
 
 class Summary(BaseModel):
@@ -77,6 +67,7 @@ def tavily_search(
     query: str,
     max_results: Annotated[int, InjectedToolArg] = 3,
     topic: Annotated[Literal["general", "news", "finance"], InjectedToolArg] = "general",
+    config: RunnableConfig = None,
 ) -> str:
     """Fetch results from Tavily search API with content summarization.
 
@@ -96,8 +87,9 @@ def tavily_search(
     # Deduplicate results by URL to avoid processing duplicate content
     unique_results = deduplicate_search_results(search_results)
 
-    # Process results with summarization
-    summarized_results = process_search_results(unique_results)
+    # Process results with summarization (config carries the per-session
+    # model overrides chosen in the frontend settings modal)
+    summarized_results = process_search_results(unique_results, config=config)
 
     # Format output for consumption
     return format_search_output(summarized_results)
@@ -162,16 +154,21 @@ def tavily_search_multiple(
 
     return search_docs
 
-def summarize_webpage_content(webpage_content: str) -> str:
+def summarize_webpage_content(webpage_content: str, config: RunnableConfig = None) -> str:
     """Summarize webpage content using the configured summarization model.
-    
+
     Args:
         webpage_content: Raw webpage content to summarize
-        
+        config: Optional RunnableConfig carrying per-session model overrides
+
     Returns:
         Formatted summary with key excerpts
     """
     try:
+        # Build the per-session summarization model (falls back to default
+        # if no override was provided in the request)
+        summarization_model = get_role_model("summarization", config)
+
         # Set up structured output model for summarization
         structured_model = summarization_model.with_structured_output(Summary)
         
@@ -224,24 +221,25 @@ def deduplicate_search_results(search_results: List[dict]) -> dict:
     
     return unique_results
 
-def process_search_results(unique_results: dict) -> dict:
+def process_search_results(unique_results: dict, config: RunnableConfig = None) -> dict:
     """Process search results by summarizing content where available.
-    
+
     Args:
         unique_results: Dictionary of unique search results
-        
+        config: Optional RunnableConfig carrying per-session model overrides
+
     Returns:
         Dictionary of processed results with summaries
     """
     summarized_results = {}
-    
+
     for url, result in unique_results.items():
         # Use existing content if no raw content for summarization
         if not result.get("raw_content"):
             content = result['content']
         else:
             # Summarize raw content for better processing
-            content = summarize_webpage_content(result['raw_content'])
+            content = summarize_webpage_content(result['raw_content'], config=config)
         
         summarized_results[url] = {
             'title': result['title'],

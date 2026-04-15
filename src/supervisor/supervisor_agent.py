@@ -37,10 +37,10 @@ from research.research_agent import researcher_agent
 from research.research_state import think_tool
 
 from utils.today import get_today_str
-from utils.initialize_model import initialize_model
 from utils.progress_bar import safe_progress_bar
 
-from LLM_models.LLM_models import SUPERVISOR_MODEL_NAME, SUPERVISOR_MODEL_PROVIDER, SUPERVISOR_MODEL_TEMPERATURE, SUPERVISOR_MODEL_BASE_URL, SUPERVISOR_MODEL_PROVIDER_API_KEY, SUPERVISOR_MODEL_MAX_TOKENS
+from LLM_models.model_catalog import get_role_model
+from langchain_core.runnables import RunnableConfig
 
 from utils.message_utils import format_messages
 
@@ -81,16 +81,11 @@ def get_notes_from_tool_calls(messages: list[BaseMessage]) -> list[str]:
 
 # ===== CONFIGURATION =====
 
-supervisor_tools = [ConductResearch, ResearchComplete, think_tool]
-supervisor_model = initialize_model(
-    model_name=SUPERVISOR_MODEL_NAME,
-    model_provider=SUPERVISOR_MODEL_PROVIDER,
-    base_url=SUPERVISOR_MODEL_BASE_URL,
-    temperature=SUPERVISOR_MODEL_TEMPERATURE,
-    api_key=SUPERVISOR_MODEL_PROVIDER_API_KEY,
-    max_tokens=SUPERVISOR_MODEL_MAX_TOKENS
-)
-supervisor_model_with_tools = supervisor_model.bind_tools(supervisor_tools)
+# NOTE: this list must have a different name from the ``supervisor_tools``
+# node function below, otherwise the function definition shadows the list
+# and ``bind_tools(supervisor_tools)`` fails with "'function' object is not
+# iterable" at runtime.
+SUPERVISOR_TOOLS = [ConductResearch, ResearchComplete, think_tool]
 
 # System constants
 # Maximum number of tool call iterations for individual researcher agents
@@ -103,7 +98,7 @@ max_concurrent_researchers = 3
 
 # ===== SUPERVISOR NODES =====
 
-async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tools"]]:
+async def supervisor(state: SupervisorState, config: RunnableConfig) -> Command[Literal["supervisor_tools"]]:
     """Coordinate research activities.
     
     Analyzes the research brief and current progress to decide:
@@ -120,15 +115,18 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
     
     try:
         supervisor_messages = state.get("supervisor_messages", [])
-        
+
+        # Build the per-session supervisor model from RunnableConfig
+        supervisor_model_with_tools = get_role_model("supervisor", config).bind_tools(SUPERVISOR_TOOLS)
+
         # Prepare system message with current date and constraints
         system_message = lead_researcher_prompt.format(
-            date=get_today_str(), 
+            date=get_today_str(),
             max_concurrent_research_units=max_concurrent_researchers,
             max_researcher_iterations=max_researcher_iterations
         )
         messages = [SystemMessage(content=system_message)] + supervisor_messages
-        
+
         # Make decision about next research steps
         print("⏳ Supervisor agent:")
         with safe_progress_bar(monitor=False, stats=False, title="", spinner='dots_waves', bar='blocks') as bar:
@@ -179,7 +177,7 @@ async def supervisor(state: SupervisorState) -> Command[Literal["supervisor_tool
         # Re-raise the exception to let the caller handle it
         raise
 
-async def supervisor_tools(state: SupervisorState) -> Command[Literal["supervisor", "__end__"]]:
+async def supervisor_tools(state: SupervisorState, config: RunnableConfig) -> Command[Literal["supervisor", "__end__"]]:
     """Execute supervisor decisions - either conduct research or end the process.
     
     Handles:
@@ -262,12 +260,15 @@ async def supervisor_tools(state: SupervisorState) -> Command[Literal["superviso
                 if conduct_research_calls:
                     # Launch parallel research agents
                     coros = [
-                        researcher_agent.ainvoke({
-                            "researcher_messages": [
-                                HumanMessage(content=tool_call["args"]["research_topic"])
-                            ],
-                            "research_topic": tool_call["args"]["research_topic"]
-                        }) 
+                        researcher_agent.ainvoke(
+                            {
+                                "researcher_messages": [
+                                    HumanMessage(content=tool_call["args"]["research_topic"])
+                                ],
+                                "research_topic": tool_call["args"]["research_topic"]
+                            },
+                            config=config,
+                        )
                         for tool_call in conduct_research_calls
                     ]
 

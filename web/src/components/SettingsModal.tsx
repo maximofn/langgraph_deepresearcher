@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { X, ArrowUp, Sparkles } from 'lucide-react';
+import { ApiKeysSection, ModelsSection, UserInfoSection } from './SettingsSections';
 
 interface SettingsModalProps {
   open: boolean;
@@ -47,12 +48,11 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4">
       <div
-        className="flex w-[520px] flex-col gap-6 rounded-2xl py-7 px-8"
+        className="my-8 flex w-[560px] flex-col gap-6 rounded-2xl py-7 px-8"
         style={{ background: '#111111', border: '1px solid #1A1A1A' }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">New Research</h2>
           <button
@@ -64,7 +64,6 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
           </button>
         </div>
 
-        {/* Query field */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <label
@@ -107,9 +106,7 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
             </div>
           </div>
 
-          {/* Sliders */}
           <div className="flex flex-col gap-5">
-            {/* Max iterations */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#CCCCCC' }}>
@@ -133,7 +130,6 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
               />
             </div>
 
-            {/* Max concurrent researchers */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#CCCCCC' }}>
@@ -158,9 +154,12 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
             </div>
           </div>
 
+          <UserInfoSection />
+          <ApiKeysSection />
+          <ModelsSection />
+
           {error && <div className="text-xs text-red-400">{error}</div>}
 
-          {/* Divider + action buttons */}
           <div className="flex flex-col gap-4">
             <hr style={{ borderColor: '#1A1A1A' }} />
             <div className="flex justify-end gap-3">

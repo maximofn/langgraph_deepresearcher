@@ -45,6 +45,22 @@ async def init_db():
                     text(f"ALTER TABLE research_events ADD COLUMN {col_name} {col_type}")
                 )
 
+        # Idempotent add-column migration for the sessions table.
+        result = await conn.execute(text("PRAGMA table_info(sessions)"))
+        existing_sessions_cols = {row[1] for row in result.fetchall()}
+        if "models_config" not in existing_sessions_cols:
+            await conn.execute(
+                text("ALTER TABLE sessions ADD COLUMN models_config JSON")
+            )
+        if "user_name" not in existing_sessions_cols:
+            await conn.execute(
+                text("ALTER TABLE sessions ADD COLUMN user_name VARCHAR(200)")
+            )
+        if "user_email" not in existing_sessions_cols:
+            await conn.execute(
+                text("ALTER TABLE sessions ADD COLUMN user_email VARCHAR(320)")
+            )
+
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI dependency yielding an async DB session."""

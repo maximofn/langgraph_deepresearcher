@@ -2,6 +2,7 @@ import type {
   ApiError,
   CreateSessionRequest,
   CreateSessionResponse,
+  ModelsCatalogResponse,
   PersistedMessage,
   Session,
   SessionListResponse,
@@ -46,12 +47,17 @@ export const api = {
   startResearch: (id: string) =>
     request<StartResearchResponse>(`/sessions/${id}/start`, { method: 'POST' }),
 
-  clarify: (id: string, clarification: string) =>
+  clarify: (id: string, clarification: string, apiKeys?: Record<string, string>) =>
     request<StartResearchResponse>(`/sessions/${id}/clarify`, {
       method: 'POST',
-      body: JSON.stringify({ clarification }),
+      body: JSON.stringify({
+        clarification,
+        ...(apiKeys && Object.keys(apiKeys).length > 0 ? { api_keys: apiKeys } : {}),
+      }),
     }),
 
   deleteSession: (id: string) =>
     request<void>(`/sessions/${id}`, { method: 'DELETE' }),
+
+  getModels: () => request<ModelsCatalogResponse>('/models/'),
 };

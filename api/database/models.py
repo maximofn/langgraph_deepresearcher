@@ -43,6 +43,13 @@ class Session(Base):
     # Configuration
     max_iterations = Column(Integer, default=6)
     max_concurrent_researchers = Column(Integer, default=3)
+    # JSON map of role -> model name picked from the frontend settings modal.
+    # Null means "use backend defaults" (see LLM_models/model_catalog.py).
+    models_config = Column(JSON, nullable=True)
+
+    # Contact info for final-report delivery.
+    user_name = Column(String(200), nullable=True)
+    user_email = Column(String(320), nullable=True)
 
 
 class Message(Base):
