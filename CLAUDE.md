@@ -169,6 +169,8 @@ REST + WebSocket API that wraps the research graph with persistence and streamin
 
 **Rate limiting**: opt-in via decorators on mutation endpoints. Do **not** re-add `default_limits` to the `Limiter` in `api/main.py` — it would throttle polling GETs used by the web UI and cause "failed to load sessions" errors.
 
+**CORS**: `cors_origins` in `api/config.py` is annotated with `NoDecode` (pydantic-settings) so the `CORS_ORIGINS` env var is accepted as a plain comma-separated string instead of JSON. To update allowed origins in production: `fly secrets set CORS_ORIGINS=https://deepresearcher.maximofn.com,https://langgraph-deepresearcher.pages.dev,http://localhost:5173`.
+
 **Docker**: `docker-compose.yml` builds the API image (`deepresearcher-api:latest`) and mounts `./data` for SQLite persistence. Code is baked into the image, so changes to `api/` require `docker compose up --build -d api` to take effect.
 
 ### React Web UI (`web/`)
@@ -189,6 +191,8 @@ Vite + React 18 + TypeScript + TailwindCSS + zustand + react-router.
 cd web && npm install
 npm run dev        # http://localhost:5173
 ```
+
+**Production API URL**: controlled by the `VITE_API_URL` env var (set in Cloudflare Pages → Settings → Environment variables). When empty (dev), Vite proxies to `localhost:8000`. In production it points to `https://langgraph-deepresearcher.fly.dev`. Both `client.ts` and `websocket.ts` read this var — `websocket.ts` replaces `http(s)` with `ws(s)` automatically.
 
 **IMPORTANT — zustand selector gotcha**:
 When returning a fallback collection from a store selector, use a **stable reference** declared outside the component (e.g. `const EMPTY_EVENTS: ResearchEvent[] = []`) — never inline `|| []`. Inline literals create a new array each render, which `useSyncExternalStore` detects as a state change, causing `Maximum update depth exceeded`. See `web/src/pages/SessionPage.tsx`.
@@ -217,6 +221,25 @@ Use `format_messages()` from [message_utils.py](src/utils/message_utils.py) for 
 - Supervisor uses `asyncio.gather()` for parallel research agent execution
 - MCP agents require async throughout due to protocol requirements
 - Main entry point uses `asyncio.run(main())` when async agents are involved
+
+## Deployment
+
+### Backend — Fly.io
+
+- **App**: `langgraph-deepresearcher` · region `cdg` (Paris) · `shared-cpu-1x` 1 GB RAM
+- **Live URL**: `https://langgraph-deepresearcher.fly.dev`
+- **Config**: `fly.toml` at repo root. Volume `data` mounted at `/app/data` for SQLite persistence.
+- **Cold start**: Dockerfile uses `.venv/bin/python run_api.py` (not `uv run`) to skip uv re-sync on wake-up. The machine auto-stops after ~3 min idle (`auto_stop_machines = "stop"`), cold start is ~3 s.
+- **Secrets**: managed via `fly secrets set`. Required: `TAVILY_API_KEY`, `CORS_ORIGINS`.
+- **Redeploy**: `fly deploy` from repo root. Secrets changes trigger automatic rolling redeploy.
+
+### Frontend — Cloudflare Pages
+
+- **Project**: `langgraph-deepresearcher` · branch `main`
+- **Live URL**: `https://deepresearcher.maximofn.com` (CNAME → `langgraph-deepresearcher.pages.dev`)
+- **Build**: root dir `web`, command `npm run build`, output `dist`, framework preset `React (Vite)`.
+- **Env var**: `VITE_API_URL=https://langgraph-deepresearcher.fly.dev` set in Pages → Settings → Environment variables (Production).
+- Cloudflare Pages redeploys automatically on every push to `main`.
 
 ## Notes
 
