@@ -44,7 +44,7 @@ export function ToolCallBlock({ event }: { event: ResearchEvent }) {
       agent={event.agent}
       copyText={argsJson}
     >
-      <pre className="overflow-x-auto rounded-[6px] bg-[#080808] p-3 font-mono text-[12px] leading-[1.5] text-[#888888]">
+      <pre className="whitespace-pre-wrap break-words rounded-[6px] bg-[#080808] p-3 font-mono text-[12px] leading-[1.5] text-[#888888]">
         {argsJson}
       </pre>
       {event.tool_call_id && (
