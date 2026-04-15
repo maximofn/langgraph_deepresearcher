@@ -4271,6 +4271,448 @@
       },
       "width": 2202,
       "height": 1478
+    },
+    {
+      "type": "rectangle",
+      "id": "XKsb2",
+      "x": 4852,
+      "y": 2353,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-8.png",
+        "mode": "fill"
+      },
+      "width": 1888,
+      "height": 916
+    },
+    {
+      "type": "frame",
+      "id": "9aPtL",
+      "x": 4852,
+      "y": 3400,
+      "name": "Modal - New Research",
+      "width": 1888,
+      "height": 916,
+      "fill": "#000000CC",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "zvYm9",
+          "x": 684,
+          "y": 180,
+          "name": "Modal Card",
+          "width": 520,
+          "fill": "#111111",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "#1A1A1A"
+          },
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            28,
+            32
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "qk8Z6",
+              "name": "Modal Top",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vWyH7",
+                  "name": "headerRow",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "v8u3y",
+                      "name": "title",
+                      "fill": "#FFFFFF",
+                      "content": "New Research",
+                      "fontFamily": "Geist",
+                      "fontSize": 20,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "IDlM6",
+                      "name": "closeBtn",
+                      "width": 32,
+                      "height": 32,
+                      "cornerRadius": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "fjPt1",
+                          "name": "closeIcon",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "x",
+                          "iconFontFamily": "lucide",
+                          "fill": "#666666"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VfNPu",
+                  "name": "queryArea",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "klEi1",
+                      "name": "queryLabel",
+                      "fill": "#888888",
+                      "content": "QUERY",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "500",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NdbvN",
+                      "name": "inputRow",
+                      "width": "fill_container",
+                      "height": 48,
+                      "fill": "#0A0A0A",
+                      "cornerRadius": 10,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#222222"
+                      },
+                      "gap": 12,
+                      "padding": [
+                        0,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "G1yVQ",
+                          "name": "placeholder",
+                          "fill": "#555555",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "What do you want to research?",
+                          "fontFamily": "Geist",
+                          "fontSize": 14
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Ttl1e",
+                          "name": "sendBtn",
+                          "width": 32,
+                          "height": 32,
+                          "fill": "#00FF00",
+                          "cornerRadius": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "MhfXH",
+                              "name": "sendIcon",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "arrow-up",
+                              "iconFontFamily": "lucide",
+                              "fill": "#0A0A0A"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "AqdxN",
+              "name": "Modal Bottom",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cNHZO",
+                  "name": "Sliders",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "wwdcd",
+                      "name": "Slider Max Iterations",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "54zxN",
+                          "name": "s1header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sCRH4",
+                              "fill": "#CCCCCC",
+                              "content": "Max iterations",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "PWuGh",
+                              "fill": "#00FF00",
+                              "content": "6",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ozn9r",
+                          "name": "s1track",
+                          "width": "fill_container",
+                          "height": 6,
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 3,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "r5xpr",
+                              "x": 0,
+                              "y": 0,
+                              "name": "slider1Fill",
+                              "fill": "#00FF00",
+                              "width": 274,
+                              "height": 6
+                            },
+                            {
+                              "type": "ellipse",
+                              "id": "1l3gj",
+                              "x": 266,
+                              "y": -5,
+                              "name": "slider1Thumb",
+                              "fill": "#FFFFFF",
+                              "width": 16,
+                              "height": 16,
+                              "effect": {
+                                "type": "shadow",
+                                "shadowType": "outer",
+                                "color": "#00000066",
+                                "offset": {
+                                  "x": 0,
+                                  "y": 1
+                                },
+                                "blur": 4
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "4W7ez",
+                      "name": "Slider Max Concurrent",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "etunJ",
+                          "name": "s2header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jy8z0",
+                              "fill": "#CCCCCC",
+                              "content": "Max concurrent researchers",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "88Epf",
+                              "fill": "#00FF00",
+                              "content": "3",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "5z8tv",
+                          "name": "s2track",
+                          "width": "fill_container",
+                          "height": 6,
+                          "fill": "#1A1A1A",
+                          "cornerRadius": 3,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "7CJwZ",
+                              "x": 0,
+                              "y": 0,
+                              "name": "slider2Fill",
+                              "fill": "#00FF00",
+                              "width": 137,
+                              "height": 6
+                            },
+                            {
+                              "type": "ellipse",
+                              "id": "81vil",
+                              "x": 129,
+                              "y": -5,
+                              "name": "slider2Thumb",
+                              "fill": "#FFFFFF",
+                              "width": 16,
+                              "height": 16,
+                              "effect": {
+                                "type": "shadow",
+                                "shadowType": "outer",
+                                "color": "#00000066",
+                                "offset": {
+                                  "x": 0,
+                                  "y": 1
+                                },
+                                "blur": 4
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "B5DKX",
+                  "name": "Divider",
+                  "fill": "#1A1A1A",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "9Wcso",
+                  "name": "Action Buttons",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "justifyContent": "end",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "gEnHX",
+                      "name": "Cancel Button",
+                      "fill": "#00000000",
+                      "cornerRadius": 10,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#333333"
+                      },
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "i7Pnr",
+                          "fill": "#AAAAAA",
+                          "content": "Cancel",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uQWHy",
+                      "name": "Start Research Button",
+                      "fill": "#00FF00",
+                      "cornerRadius": 10,
+                      "gap": 8,
+                      "padding": [
+                        10,
+                        24
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "sWTbb",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "sparkles",
+                          "iconFontFamily": "lucide",
+                          "fill": "#0A0A0A"
+                        },
+                        {
+                          "type": "text",
+                          "id": "UZLaJ",
+                          "fill": "#0A0A0A",
+                          "content": "Start Research",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
