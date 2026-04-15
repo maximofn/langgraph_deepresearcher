@@ -17,11 +17,38 @@
     scrollbar-color: #2a2a2a transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: #2a2a2a;
     border-radius: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #3a3a3a;
+  }
+
+  /* Modal scrollbar — same style, slightly visible track */
+  .scrollbar-modal {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #111111;
+  }
+  .scrollbar-modal::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-modal::-webkit-scrollbar-track {
+    background: #111111;
+    border-radius: 4px;
+  }
+  .scrollbar-modal::-webkit-scrollbar-thumb {
+    background-color: #2a2a2a;
+    border-radius: 4px;
+  }
+  .scrollbar-modal::-webkit-scrollbar-thumb:hover {
+    background-color: #00FF0033;
+    border: 1px solid #00FF0022;
   }
 }
 

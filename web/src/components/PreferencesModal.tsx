@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { ApiKeysSection, ModelsSection, UserInfoSection } from './SettingsSections';
 
@@ -7,12 +8,19 @@ interface PreferencesModalProps {
 }
 
 export function PreferencesModal({ open, onClose }: PreferencesModalProps) {
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4">
       <div
-        className="my-8 flex w-[560px] flex-col gap-6 rounded-2xl py-7 px-8"
+        className="my-8 flex w-[560px] max-h-[90vh] flex-col gap-6 rounded-2xl py-7 px-8 overflow-y-auto scrollbar-modal"
         style={{ background: '#111111', border: '1px solid #1A1A1A' }}
       >
         <div className="flex items-center justify-between">

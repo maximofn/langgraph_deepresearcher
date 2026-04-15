@@ -274,6 +274,13 @@ export function ModelsSection() {
         MODELS PER AGENT
       </label>
 
+      <img
+        src="https://images.maximofn.com/DeepResearcher-architecture.webp"
+        alt="DeepResearcher agent architecture"
+        className="w-full rounded-[8px] object-contain"
+        style={{ border: '1px solid #1A1A1A' }}
+      />
+
       {discoveryError && (
         <div
           className="flex items-start gap-2 rounded-[8px] px-3 py-2"
