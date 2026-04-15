@@ -1,4 +1,5 @@
 import type { ResearchEvent } from '@/api/types';
+import { ClarifyWithUserBlock } from './blocks/ClarifyWithUserBlock';
 import { SimpleBlock } from './blocks/SimpleBlock';
 import { ToolCallBlock } from './blocks/ToolCallBlock';
 import { ToolOutputBlock } from './blocks/ToolOutputBlock';
@@ -15,9 +16,10 @@ export function EventRenderer({ event }: { event: ResearchEvent }) {
       return <ToolCallBlock event={event} />;
     case 'Tool':
       return <ToolOutputBlock event={event} />;
+    case 'ClarifyWithUser':
+      return <ClarifyWithUserBlock event={event} />;
     case 'Human':
     case 'AI':
-    case 'ClarifyWithUser':
     case 'ResearchQuestion':
     case 'System':
     case 'Other':
