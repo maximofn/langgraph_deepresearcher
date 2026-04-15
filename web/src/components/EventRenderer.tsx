@@ -4,6 +4,12 @@ import { ToolCallBlock } from './blocks/ToolCallBlock';
 import { ToolOutputBlock } from './blocks/ToolOutputBlock';
 
 export function EventRenderer({ event }: { event: ResearchEvent }) {
+  // Skip internal session lifecycle events — they are backend plumbing and the
+  // YOU block already shows the user's query, making these redundant.
+  if (event.event_type === 'session_created' || event.event_type === 'session_started') {
+    return null;
+  }
+
   switch (event.message_type) {
     case 'ToolCall':
       return <ToolCallBlock event={event} />;
