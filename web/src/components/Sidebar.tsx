@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BrainCircuit, Plus, Search, Settings, Trash2 } from 'lucide-react';
 
 import { api } from '@/api/client';
@@ -38,7 +38,8 @@ interface SidebarProps {
 export function Sidebar({ onNewResearch }: SidebarProps) {
   const sessions = useSessionStore((s) => s.sessions);
   const removeSession = useSessionStore((s) => s.removeSession);
-  const { id: activeId } = useParams<{ id: string }>();
+  const { pathname } = useLocation();
+  const activeId = pathname.startsWith('/session/') ? pathname.split('/')[2] : undefined;
   const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
@@ -137,7 +138,7 @@ export function Sidebar({ onNewResearch }: SidebarProps) {
               onClick={() => navigate(`/session/${s.id}`)}
               className={`group relative cursor-pointer rounded-[8px] p-3 transition-colors ${
                 active
-                  ? 'border-l-[3px] border-[#00FF0040] bg-terminal-surface pl-[9px]'
+                  ? 'bg-[#00FF0015] border border-[#00FF0030]'
                   : 'bg-[#0F0F0F] hover:bg-[#121212]'
               }`}
             >
