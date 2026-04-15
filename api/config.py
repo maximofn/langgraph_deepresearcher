@@ -1,6 +1,7 @@
 from pydantic import field_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, NoDecode
 from typing import Optional, List
+from typing_extensions import Annotated
 
 
 class Settings(BaseSettings):
@@ -20,7 +21,7 @@ class Settings(BaseSettings):
     session_expiry_hours: int = 24
 
     # CORS
-    cors_origins: List[str] = [
+    cors_origins: Annotated[List[str], NoDecode] = [
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:8000",
