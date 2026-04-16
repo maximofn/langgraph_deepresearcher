@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 import { api } from '@/api/client';
@@ -182,31 +182,44 @@ export function ChatView({ session, events }: ChatViewProps) {
               />
 
               {/* Post-research chat conversation */}
-              {chatMessages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`my-3 rounded-[8px] px-4 py-3 ${
-                    msg.role === 'user'
-                      ? 'border-l-[3px] bg-[#0A0F15] font-sans text-[13px] text-terminal-textPrimary'
-                      : 'border-l-[3px] bg-[#0A0F15] font-sans text-[13px] text-terminal-textPrimary'
-                  }`}
-                  style={{
-                    borderLeftColor: msg.role === 'user' ? '#4FC3F766' : '#4FC3F7AA',
-                    backgroundColor: msg.role === 'user' ? '#0A0D10' : '#0A0F15',
-                  }}
-                >
-                  <div className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-[#4FC3F7]">
-                    {msg.role === 'user' ? 'You' : 'Writer'}
+              {chatMessages.map((msg, i) =>
+                msg.role === 'user' ? (
+                  /* YOU block — same style as YouBlock.tsx */
+                  <div key={i} className="flex w-full flex-col gap-[6px] px-1 py-2">
+                    <div className="flex items-center justify-end gap-2">
+                      <span
+                        className="font-mono text-[11px] font-semibold uppercase tracking-wide"
+                        style={{ color: '#00FF00' }}
+                      >
+                        YOU
+                      </span>
+                      <span
+                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+                        style={{ backgroundColor: '#00FF0015' }}
+                      >
+                        <User size={10} color="#00FF00" />
+                      </span>
+                    </div>
+                    <div className="whitespace-pre-wrap break-words text-right font-sans text-[13px] leading-[1.4] text-[#CCCCCC]">
+                      {msg.content}
+                    </div>
                   </div>
-                  {msg.role === 'assistant' ? (
+                ) : (
+                  /* WRITER response block */
+                  <div
+                    key={i}
+                    className="my-3 rounded-[8px] border-l-[3px] px-4 py-3 font-sans text-[13px] text-terminal-textPrimary"
+                    style={{ borderLeftColor: '#4FC3F7AA', backgroundColor: '#0A0F15' }}
+                  >
+                    <div className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-[#4FC3F7]">
+                      Writer
+                    </div>
                     <div className="prose prose-invert prose-sm max-w-none">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
-                  ) : (
-                    <p>{msg.content}</p>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ),
+              )}
 
               {isChatting && (
                 <div className="my-3 flex items-center gap-2 px-4 py-3 font-mono text-[11px] text-[#4FC3F7]">

@@ -31,7 +31,7 @@ export function PostResearchChat({ onSubmit, disabled }: PostResearchChatProps) 
       <div className="mb-2 flex items-center gap-2">
         <MessageCircle size={12} className="text-[#4FC3F7]" />
         <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-[#4FC3F7]">
-          Ask the writer
+          Ask me
         </span>
       </div>
       <div className="flex gap-2">
