@@ -74,7 +74,10 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
     <aside className="flex h-full w-80 flex-col overflow-hidden bg-terminal-bg">
       {/* Brand + actions */}
       <div className="flex flex-col gap-4 px-4 pb-4 pt-6">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 transition-opacity hover:opacity-80"
+        >
           <div
             className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#00FF0040]"
             style={{
@@ -86,7 +89,7 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
           <span className="font-sans text-[15px] font-semibold text-white">
             Deep Researcher
           </span>
-        </div>
+        </button>
 
         <button
           onClick={onNewResearch}

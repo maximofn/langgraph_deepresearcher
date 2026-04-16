@@ -1345,14 +1345,14 @@
                   "id": "LrOml",
                   "name": "msg3",
                   "width": "fill_container",
-                  "fill": "#150A0A",
+                  "fill": "#0A0D15",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": {
                       "left": 3
                     },
-                    "fill": "#FF6B6B40"
+                    "fill": "#6B8AFF40"
                   },
                   "layout": "vertical",
                   "gap": 10,
@@ -1373,7 +1373,7 @@
                           "type": "ellipse",
                           "id": "2Wn7F",
                           "name": "msg3Dot",
-                          "fill": "#FF6B6B",
+                          "fill": "#6B8AFF",
                           "width": 8,
                           "height": 8
                         },
@@ -1381,7 +1381,7 @@
                           "type": "text",
                           "id": "Fw360",
                           "name": "msg3Label",
-                          "fill": "#FF6B6B",
+                          "fill": "#6B8AFF",
                           "content": "CLARIFY WITH USER",
                           "fontFamily": "Geist Mono",
                           "fontSize": 11,
@@ -2533,14 +2533,14 @@
                   "id": "YqU6K",
                   "name": "Collapsed CLARIFY",
                   "width": "fill_container",
-                  "fill": "#150A0A",
+                  "fill": "#0A0D15",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": {
                       "left": 3
                     },
-                    "fill": "#FF6B6B30"
+                    "fill": "#6B8AFF40"
                   },
                   "gap": 10,
                   "padding": [
@@ -2553,7 +2553,7 @@
                       "type": "ellipse",
                       "id": "P8kDZ",
                       "name": "b3dot",
-                      "fill": "#FF6B6B",
+                      "fill": "#6B8AFF",
                       "width": 8,
                       "height": 8
                     },
@@ -2561,7 +2561,7 @@
                       "type": "text",
                       "id": "V66md",
                       "name": "b3label",
-                      "fill": "#FF6B6B",
+                      "fill": "#6B8AFF",
                       "content": "CLARIFY WITH USER",
                       "fontFamily": "Geist Mono",
                       "fontSize": 11,
@@ -4416,7 +4416,8 @@
                           "width": "fill_container",
                           "content": "What do you want to research?",
                           "fontFamily": "Geist",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",

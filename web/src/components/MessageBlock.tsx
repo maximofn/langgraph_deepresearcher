@@ -164,7 +164,7 @@ export interface BlockStyle {
 export const BLOCK_CONFIG: Record<string, BlockStyle> = {
   Human: { color: '#00FF00', cardBg: '#0A150A', title: 'PRO' },
   AI: { color: '#00FF00', cardBg: '#0A150A', title: 'ASSISTANT' },
-  ClarifyWithUser: { color: '#FF6B6B', cardBg: '#150A0A', title: 'CLARIFY WITH USER' },
+  ClarifyWithUser: { color: '#6B8AFF', cardBg: '#0A0D15', title: 'CLARIFY WITH USER' },
   ResearchQuestion: { color: '#C084FC', cardBg: '#100A15', title: 'RESEARCH BRIEF' },
   Tool: { color: '#F472B6', cardBg: '#150A10', title: 'TOOL OUTPUT' },
   ToolCall: { color: '#06B6D4', cardBg: '#0A1215', title: 'TOOL CALL' },

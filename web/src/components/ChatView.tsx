@@ -160,10 +160,11 @@ export function ChatView({ session, events }: ChatViewProps) {
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="scrollbar-thin flex-1 overflow-y-auto px-6 py-4"
+          className="scrollbar-thin flex-1 overflow-y-auto"
         >
+          <div className="flex min-h-full flex-col justify-end px-6 py-4">
           {events.length === 0 && session.status === 'created' && (
-            <div className="mt-20 text-center font-sans text-sm text-[#555555]">
+            <div className="text-center font-sans text-sm text-[#555555]">
               Waiting for research to start…
             </div>
           )}
@@ -251,6 +252,7 @@ export function ChatView({ session, events }: ChatViewProps) {
               Research failed. Check the server logs for details.
             </div>
           )}
+          </div>
         </div>
       </div>
     </CollapseAllProvider>

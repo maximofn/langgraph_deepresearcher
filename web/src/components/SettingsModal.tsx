@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { X, ArrowUp, Sparkles } from 'lucide-react';
 import { ApiKeysSection, ModelsSection, UserInfoSection } from './SettingsSections';
 
@@ -21,6 +21,7 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
   const [query, setQuery] = useState('');
   const [maxIterations, setMaxIterations] = useState(6);
   const [maxConcurrent, setMaxConcurrent] = useState(3);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,27 +81,38 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
               QUERY
             </label>
             <div
-              className="flex items-center gap-3 px-4"
+              className="flex items-start gap-3 px-4 py-3"
               style={{
-                height: '48px',
                 background: '#0A0A0A',
                 border: '1px solid #222222',
                 borderRadius: '10px',
               }}
             >
-              <input
-                type="text"
+              <textarea
+                ref={textareaRef}
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  const el = e.target;
+                  el.style.height = 'auto';
+                  el.style.height = `${el.scrollHeight}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (query.trim() && !submitting) handleSubmit(e as unknown as FormEvent);
+                  }
+                }}
                 placeholder="What do you want to research?"
-                className="new-research-input flex-1 bg-transparent outline-none"
-                style={{ fontSize: '14px', color: '#ffffff' }}
+                className="new-research-input flex-1 bg-transparent outline-none resize-none overflow-hidden"
+                style={{ fontSize: '14px', color: '#ffffff', minHeight: '24px', lineHeight: '24px' }}
+                rows={1}
                 autoFocus
               />
               <button
                 type="submit"
                 disabled={!query.trim() || submitting}
-                className="flex flex-shrink-0 items-center justify-center disabled:opacity-40"
+                className="flex flex-shrink-0 self-end items-center justify-center disabled:opacity-40"
                 style={{
                   width: '32px',
                   height: '32px',
