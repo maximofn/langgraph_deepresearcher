@@ -4,12 +4,13 @@ import type { ResearchEvent } from '@/api/types';
 /**
  * "YOU" block for real user messages.
  *
+ * Accepts either a ResearchEvent or a plain content string.
  * Mirror-inverted design: strips all card styling (no background, no border,
  * no rounded corners, no collapse, no copy button) to differentiate user
  * messages from agent/system blocks. Right-aligned.
  */
-export function YouBlock({ event }: { event: ResearchEvent }) {
-  const content = event.content || '';
+export function YouBlock({ event, content: contentProp }: { event?: ResearchEvent; content?: string }) {
+  const content = contentProp ?? event?.content ?? '';
 
   return (
     <div className="flex w-full flex-col gap-[6px] px-1 py-2 mt-[72px]">

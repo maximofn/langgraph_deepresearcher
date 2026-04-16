@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronsDownUp, ChevronsUpDown, User } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -13,6 +13,7 @@ import { CollapseAllProvider, useCollapseAll } from './CollapseAllContext';
 import { EventRenderer } from './EventRenderer';
 import { FinalReport } from './FinalReport';
 import { StatusBadge } from './StatusBadge';
+import { YouBlock } from './blocks/YouBlock';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -187,26 +188,7 @@ export function ChatView({ session, events }: ChatViewProps) {
               {/* Post-research chat conversation */}
               {chatMessages.map((msg, i) =>
                 msg.role === 'user' ? (
-                  /* YOU block — same style as YouBlock.tsx */
-                  <div key={i} className="flex w-full flex-col gap-[6px] px-1 py-2">
-                    <div className="flex items-center justify-end gap-2">
-                      <span
-                        className="font-mono text-[11px] font-semibold uppercase tracking-wide"
-                        style={{ color: '#00FF00' }}
-                      >
-                        YOU
-                      </span>
-                      <span
-                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
-                        style={{ backgroundColor: '#00FF0015' }}
-                      >
-                        <User size={10} color="#00FF00" />
-                      </span>
-                    </div>
-                    <div className="whitespace-pre-wrap break-words text-right font-sans text-[13px] leading-[1.4] text-[#CCCCCC]">
-                      {msg.content}
-                    </div>
-                  </div>
+                  <YouBlock key={i} content={msg.content} />
                 ) : (
                   /* WRITER response block */
                   <div
