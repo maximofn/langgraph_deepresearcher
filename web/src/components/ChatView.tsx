@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 import { api } from '@/api/client';
 import type { ResearchEvent, Session } from '@/api/types';
@@ -10,6 +11,11 @@ import { CollapseAllProvider, useCollapseAll } from './CollapseAllContext';
 import { EventRenderer } from './EventRenderer';
 import { FinalReport } from './FinalReport';
 import { StatusBadge } from './StatusBadge';
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 function CollapseAllButtons() {
   const ctx = useCollapseAll();
@@ -62,6 +68,14 @@ export function ChatView({ session, events }: ChatViewProps) {
   const setActive = useSessionStore((s) => s.setActiveSession);
   const apiKeys = useSessionStore((s) => s.apiKeys);
 
+  // Local chat conversation history (user messages + assistant responses)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  // Track how many chat_response events we've already processed (avoid duplicates)
+  const processedChatResponsesRef = useRef(0);
+
+  const [isChatting, setIsChatting] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+
   useEffect(() => {
     stickToBottomRef.current = true;
   }, [session.id]);
@@ -69,7 +83,20 @@ export function ChatView({ session, events }: ChatViewProps) {
   useEffect(() => {
     if (!stickToBottomRef.current) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [events.length, session.status, session.final_report]);
+  }, [events.length, session.status, session.final_report, chatMessages.length]);
+
+  // Watch for incoming chat_response events and add them to the chat history
+  useEffect(() => {
+    const chatResponseEvents = events.filter((e) => e.event_type === 'chat_response');
+    const newEvents = chatResponseEvents.slice(processedChatResponsesRef.current);
+    if (newEvents.length === 0) return;
+
+    processedChatResponsesRef.current = chatResponseEvents.length;
+    setChatMessages((prev) => [
+      ...prev,
+      ...newEvents.map((e) => ({ role: 'assistant' as const, content: e.content })),
+    ]);
+  }, [events]);
 
   const handleScroll = () => {
     const el = scrollRef.current;
@@ -77,8 +104,6 @@ export function ChatView({ session, events }: ChatViewProps) {
     const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
     stickToBottomRef.current = distanceFromBottom < 40;
   };
-
-  const [isChatting, setIsChatting] = useState(false);
 
   const handleClarify = async (clarification: string) => {
     const nonEmpty = Object.fromEntries(
@@ -99,9 +124,19 @@ export function ChatView({ session, events }: ChatViewProps) {
   };
 
   const handleChat = async (message: string) => {
+    setChatError(null);
     setIsChatting(true);
+    // Optimistically add the user message to the local chat history
+    setChatMessages((prev) => [...prev, { role: 'user', content: message }]);
     try {
       await api.chat(session.id, message);
+    } catch (err) {
+      const msg = err && typeof err === 'object' && 'message' in err
+        ? String((err as { message: unknown }).message)
+        : 'Failed to send message. Please try again.';
+      setChatError(msg);
+      // Remove the optimistic user message on error
+      setChatMessages((prev) => prev.slice(0, -1));
     } finally {
       setIsChatting(false);
     }
@@ -145,6 +180,50 @@ export function ChatView({ session, events }: ChatViewProps) {
                 markdown={session.final_report}
                 filenameHint={session.initial_query}
               />
+
+              {/* Post-research chat conversation */}
+              {chatMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`my-3 rounded-[8px] px-4 py-3 ${
+                    msg.role === 'user'
+                      ? 'border-l-[3px] bg-[#0A0F15] font-sans text-[13px] text-terminal-textPrimary'
+                      : 'border-l-[3px] bg-[#0A0F15] font-sans text-[13px] text-terminal-textPrimary'
+                  }`}
+                  style={{
+                    borderLeftColor: msg.role === 'user' ? '#4FC3F766' : '#4FC3F7AA',
+                    backgroundColor: msg.role === 'user' ? '#0A0D10' : '#0A0F15',
+                  }}
+                >
+                  <div className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-[#4FC3F7]">
+                    {msg.role === 'user' ? 'You' : 'Writer'}
+                  </div>
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-invert prose-sm max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
+                </div>
+              ))}
+
+              {isChatting && (
+                <div className="my-3 flex items-center gap-2 px-4 py-3 font-mono text-[11px] text-[#4FC3F7]">
+                  <span className="animate-pulse">●</span>
+                  <span>Writer is thinking…</span>
+                </div>
+              )}
+
+              {chatError && (
+                <div
+                  className="my-3 rounded-[8px] border-l-[3px] px-4 py-3 font-sans text-[13px] text-[#FF6B6B]"
+                  style={{ borderLeftColor: '#FF6B6B66', backgroundColor: '#150A0A' }}
+                >
+                  {chatError}
+                </div>
+              )}
+
               <PostResearchChat onSubmit={handleChat} disabled={isChatting} />
             </>
           )}
