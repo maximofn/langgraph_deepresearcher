@@ -12,7 +12,7 @@ export function YouBlock({ event }: { event: ResearchEvent }) {
   const content = event.content || '';
 
   return (
-    <div className="flex w-full flex-col gap-[6px] px-1 py-2">
+    <div className="flex w-full flex-col gap-[6px] px-1 py-2 mt-[72px]">
       {/* Header: [YOU label] [Avatar] — right-aligned */}
       <div className="flex items-center justify-end gap-2">
         <span
