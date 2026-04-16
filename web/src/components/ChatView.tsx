@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 
 import { api } from '@/api/client';
 import type { ResearchEvent, Session } from '@/api/types';
 import { useSessionStore } from '@/state/sessionStore';
 import { ClarifyInput } from './ClarifyInput';
+import { PostResearchChat } from './PostResearchChat';
 import { CollapseAllProvider, useCollapseAll } from './CollapseAllContext';
 import { EventRenderer } from './EventRenderer';
 import { FinalReport } from './FinalReport';
@@ -77,6 +78,8 @@ export function ChatView({ session, events }: ChatViewProps) {
     stickToBottomRef.current = distanceFromBottom < 40;
   };
 
+  const [isChatting, setIsChatting] = useState(false);
+
   const handleClarify = async (clarification: string) => {
     const nonEmpty = Object.fromEntries(
       Object.entries(apiKeys).filter(([, v]) => v && v.trim().length > 0),
@@ -93,6 +96,15 @@ export function ChatView({ session, events }: ChatViewProps) {
     };
     upsertSession(updated);
     setActive(updated);
+  };
+
+  const handleChat = async (message: string) => {
+    setIsChatting(true);
+    try {
+      await api.chat(session.id, message);
+    } finally {
+      setIsChatting(false);
+    }
   };
 
   return (
@@ -128,10 +140,13 @@ export function ChatView({ session, events }: ChatViewProps) {
           )}
 
           {session.status === 'completed' && session.final_report && (
-            <FinalReport
-              markdown={session.final_report}
-              filenameHint={session.initial_query}
-            />
+            <>
+              <FinalReport
+                markdown={session.final_report}
+                filenameHint={session.initial_query}
+              />
+              <PostResearchChat onSubmit={handleChat} disabled={isChatting} />
+            </>
           )}
 
           {session.status === 'failed' && (

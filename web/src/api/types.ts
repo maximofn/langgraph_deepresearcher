@@ -39,7 +39,8 @@ export type EventType =
   | 'final_report'
   | 'clarification_needed'
   | 'error'
-  | 'user_message';
+  | 'user_message'
+  | 'chat_response';
 
 export interface ResearchEvent {
   event_type: EventType;
@@ -141,6 +142,10 @@ export interface PersistedMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   created_at: string;
+}
+
+export interface ChatSessionRequest {
+  message: string;
 }
 
 export interface ApiError {

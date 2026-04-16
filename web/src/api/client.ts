@@ -1,6 +1,7 @@
 import type {
   ApiError,
   ApiKeysMap,
+  ChatSessionRequest,
   CreateSessionRequest,
   CreateSessionResponse,
   ModelsCatalogResponse,
@@ -57,6 +58,12 @@ export const api = {
         clarification,
         ...(apiKeys && Object.keys(apiKeys).length > 0 ? { api_keys: apiKeys } : {}),
       }),
+    }),
+
+  chat: (id: string, message: string) =>
+    request<StartResearchResponse>(`/sessions/${id}/chat`, {
+      method: 'POST',
+      body: JSON.stringify({ message } satisfies ChatSessionRequest),
     }),
 
   deleteSession: (id: string) =>
