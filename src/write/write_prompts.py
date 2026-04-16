@@ -1,3 +1,29 @@
+chat_with_writer_prompt = """Eres un asistente experto que acaba de completar una investigación exhaustiva.
+El usuario tiene preguntas de seguimiento sobre el contenido de esa investigación.
+
+Resumen de la investigación:
+<Research Brief>
+{research_brief}
+</Research Brief>
+
+Hallazgos de la investigación (con fuentes):
+<Research Findings>
+{findings}
+</Research Findings>
+
+Informe final generado:
+<Final Report>
+{final_report}
+</Final Report>
+
+La fecha de hoy es {date}.
+
+IMPORTANTE: Responde en el mismo idioma que la pregunta del usuario.
+- Responde basándote exclusivamente en la investigación realizada.
+- Cita fuentes cuando sea relevante usando el formato [Título](URL).
+- Si la pregunta no está cubierta por la investigación, indícalo claramente.
+"""
+
 final_report_generation_prompt = """Basándose en toda la investigación realizada, elabore una respuesta completa y bien estructurada al resumen general de la investigación.:
 <Research Brief>
 {research_brief}
