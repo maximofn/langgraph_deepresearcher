@@ -119,11 +119,16 @@ async def supervisor(state: SupervisorState, config: RunnableConfig) -> Command[
         # Build the per-session supervisor model from RunnableConfig
         supervisor_model_with_tools = get_role_model("supervisor", config).bind_tools(SUPERVISOR_TOOLS)
 
+        # Read limits from config (set by the API) or fall back to module-level defaults
+        configurable = config.get("configurable", {}) if config else {}
+        effective_max_iterations = configurable.get("max_iterations", max_researcher_iterations)
+        effective_max_concurrent = configurable.get("max_concurrent_researchers", max_concurrent_researchers)
+
         # Prepare system message with current date and constraints
         system_message = lead_researcher_prompt.format(
             date=get_today_str(),
-            max_concurrent_research_units=max_concurrent_researchers,
-            max_researcher_iterations=max_researcher_iterations
+            max_concurrent_research_units=effective_max_concurrent,
+            max_researcher_iterations=effective_max_iterations
         )
         messages = [SystemMessage(content=system_message)] + supervisor_messages
 
@@ -202,15 +207,20 @@ async def supervisor_tools(state: SupervisorState, config: RunnableConfig) -> Co
             content=f"Research iterations: {research_iterations}"
         )
         format_messages([system_message], title="Supervisor Agent tools - Research iterations")
-        
+
+        # Read limits from config (set by the API) or fall back to module-level defaults
+        configurable = config.get("configurable", {}) if config else {}
+        effective_max_iterations = configurable.get("max_iterations", max_researcher_iterations)
+        effective_max_concurrent = configurable.get("max_concurrent_researchers", max_concurrent_researchers)
+
         # Initialize variables for single return pattern
         tool_messages = []
         all_raw_notes = []
         next_step = "supervisor"  # Default next step
         should_end = False
-        
+
         # Check exit criteria first
-        exceeded_iterations = research_iterations >= max_researcher_iterations
+        exceeded_iterations = research_iterations >= effective_max_iterations
         no_tool_calls = not most_recent_message.tool_calls
         research_complete = any(
             tool_call["name"] == "ResearchComplete" 
