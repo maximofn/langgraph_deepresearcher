@@ -39,6 +39,7 @@ class EventType(str, Enum):
     # Error and user events
     ERROR = "error"
     USER_MESSAGE = "user_message"
+    CHAT_RESPONSE = "chat_response"
 
 
 class MessageKind(str, Enum):

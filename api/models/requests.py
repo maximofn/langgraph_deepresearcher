@@ -129,6 +129,17 @@ class CreateSessionRequest(BaseModel):
         return cleaned or None
 
 
+class ChatSessionRequest(BaseModel):
+    """Request para enviar un mensaje de chat en una sesión completada."""
+
+    message: str = Field(
+        ...,
+        min_length=1,
+        description="Pregunta de seguimiento sobre la investigación",
+        max_length=5000,
+    )
+
+
 class ContinueSessionRequest(BaseModel):
     """Request to continue a session with clarification"""
 

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.db import db_session_context, get_db
 from api.database.models import SessionStatus
-from api.models.requests import ContinueSessionRequest, CreateSessionRequest
+from api.models.requests import ContinueSessionRequest, CreateSessionRequest, ChatSessionRequest
 from api.models.responses import (
     CreateSessionResponse,
     MessageResponse,
@@ -167,6 +167,27 @@ async def start_research(
     )
 
 
+async def _chat_research_bg(session_id: str, message: str) -> None:
+    """Background task: envía una pregunta al writer en una sesión completada."""
+    research_service = ResearchService()
+    async with db_session_context() as db_session:
+        svc = SessionService(db_session)
+        session = await svc.get_session(session_id)
+        if session is None:
+            logger.error("Background task: session %s vanished", session_id)
+            return
+        try:
+            await research_service.chat_with_research(
+                session_id=session.id,
+                thread_id=session.thread_id,
+                message=message,
+                db=db_session,
+                models_config=session.models_config,
+            )
+        except Exception:
+            logger.exception("Chat failed for session %s", session_id)
+
+
 @router.post("/{session_id}/clarify", response_model=StartResearchResponse)
 async def provide_clarification(
     session_id: str,
@@ -197,6 +218,34 @@ async def provide_clarification(
         status="continued",
         session_id=session_id,
         message="Research continued. Connect to WebSocket for real-time updates.",
+    )
+
+
+@router.post("/{session_id}/chat", response_model=StartResearchResponse)
+async def chat_with_session(
+    session_id: str,
+    request: ChatSessionRequest,
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
+):
+    """Envía una pregunta de seguimiento al writer (solo sesiones COMPLETED)."""
+    svc = SessionService(db)
+    session = await svc.get_session(session_id)
+
+    if session is None:
+        raise SessionNotFoundError(f"Session {session_id} not found")
+
+    if session.status != SessionStatus.COMPLETED:
+        raise InvalidSessionStateError(
+            f"Chat solo disponible en sesiones completadas (status: {session.status.value})"
+        )
+
+    background_tasks.add_task(_chat_research_bg, session_id, request.message)
+
+    return StartResearchResponse(
+        status="processing",
+        session_id=session_id,
+        message="Chat message sent. Connect to WebSocket for real-time response.",
     )
 
 

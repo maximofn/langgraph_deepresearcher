@@ -171,6 +171,64 @@ class ResearchService:
 
         return await self._handle_result(session_id, result, db)
 
+    async def chat_with_research(
+        self,
+        session_id: str,
+        thread_id: str,
+        message: str,
+        db: Optional[AsyncSession] = None,
+        models_config: Optional[Dict[str, str]] = None,
+        api_keys: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, Any]:
+        """Envía una pregunta de seguimiento al writer tras completar la investigación."""
+        if db is not None:
+            await SessionService(db).add_message(session_id, "user", message)
+
+        agent = _get_writer_builder().compile(checkpointer=self.checkpointer_manager.get_checkpointer())
+        config = {
+            "configurable": {
+                "thread_id": thread_id,
+                "models": models_config or {},
+                "api_keys": api_keys or {},
+            }
+        }
+
+        try:
+            with set_session_context(session_id):
+                result = await agent.ainvoke(
+                    {"messages": [HumanMessage(content=message)]},
+                    config=config,
+                )
+        except Exception as exc:
+            logger.exception("Chat run failed for session %s", session_id)
+            await self.event_service.emit(
+                session_id=session_id,
+                event_type=EventType.ERROR,
+                title="Chat Error",
+                content=str(exc),
+                is_intermediate=False,
+            )
+            raise
+
+        messages = result.get("messages", [])
+        response_text = ""
+        if messages:
+            last = messages[-1]
+            response_text = last.content if hasattr(last, "content") else str(last)
+
+        if db is not None and response_text:
+            await SessionService(db).add_message(session_id, "assistant", response_text)
+
+        await self.event_service.emit(
+            session_id=session_id,
+            event_type=EventType.CHAT_RESPONSE,
+            title="Chat Response",
+            content=response_text,
+            is_intermediate=False,
+        )
+
+        return {"response": response_text}
+
     async def _handle_result(
         self,
         session_id: str,
