@@ -183,6 +183,11 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
         })}
       </div>
 
+      {/* Version */}
+      <div className="px-4 pb-1 text-right font-mono text-[10px] text-[#3A3A3A]">
+        v1.0.0
+      </div>
+
       {/* User footer */}
       <div className="flex items-center gap-3 border-t border-[#1E1E1E] px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#00FF0015]">
