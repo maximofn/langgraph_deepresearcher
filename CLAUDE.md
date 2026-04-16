@@ -72,7 +72,11 @@ The system follows a sequential pipeline with four main phases:
    - Integrates the entire workflow: scope → research → report generation
    - Synthesizes all research findings into a comprehensive final report
    - Uses `final_report_generation_prompt` to format findings into a cohesive document
-   - Compiles all phases (clarify_with_user, write_research_brief, supervisor_subgraph, final_report_generation) into a single graph
+   - Compiles all phases into a single graph: `route_request → clarify_with_user → write_research_brief → supervisor_subgraph → final_report_generation`
+   - After the report is generated, supports **post-research chat** via the `chat_with_writer` node:
+     - `route_request` (entry node) inspects `state["final_report"]`; if set, routes to `chat_with_writer` instead of `clarify_with_user`
+     - `chat_with_writer` builds a context-rich prompt from `notes`, `research_brief` and `final_report`, then calls the writer model with the full message history for multi-turn support
+     - Re-uses the same `thread_id` so LangGraph reloads the checkpointed state on each follow-up question
 
 ### State Management
 
@@ -158,14 +162,14 @@ REST + WebSocket API that wraps the research graph with persistence and streamin
 **Structure**:
 - `api/main.py` — FastAPI app, CORS, optional rate limiting via `slowapi`, optional Prometheus metrics
 - `api/config.py` — settings (host/port, CORS, rate limit toggles, DB path)
-- `api/routes/sessions.py` — session CRUD + `start` / `clarify` endpoints
+- `api/routes/sessions.py` — session CRUD + `start` / `clarify` / `chat` endpoints
 - `api/routes/websocket.py` — `/ws/sessions/{id}` channel for real-time events
 - `api/services/session_service.py` — session/thread lifecycle and persistence
 - `api/services/event_service.py` — stores and replays research events
 - `api/websockets/connection_manager.py` — per-session WS broadcast
 - `api/websockets/message_interceptor.py` — patches `format_messages()` to emit events to subscribed WS clients
 - `api/database/` — SQLite models and migrations for sessions, messages, events
-- `api/models/` — Pydantic request/response/event schemas
+- `api/models/` — Pydantic request/response/event schemas (`CreateSessionRequest`, `ContinueSessionRequest`, `ChatSessionRequest`; `EventType` includes `CHAT_RESPONSE`)
 
 **Rate limiting**: opt-in via decorators on mutation endpoints. Do **not** re-add `default_limits` to the `Limiter` in `api/main.py` — it would throttle polling GETs used by the web UI and cause "failed to load sessions" errors.
 
@@ -180,7 +184,7 @@ Vite + React 18 + TypeScript + TailwindCSS + zustand + react-router.
 **Structure**:
 - `web/src/App.tsx` — routes and session list polling
 - `web/src/pages/HomePage.tsx`, `SessionPage.tsx`
-- `web/src/components/` — `Sidebar`, `ChatView`, `EventRenderer`, `MessageBlock`, `FinalReport`, `ClarifyInput`, `SettingsModal`, `StatusBadge`
+- `web/src/components/` — `Sidebar`, `ChatView`, `EventRenderer`, `MessageBlock`, `FinalReport`, `ClarifyInput`, `PostResearchChat`, `markdownComponents`, `SettingsModal`, `StatusBadge`
 - `web/src/state/sessionStore.ts` — zustand store for sessions and events
 - `web/src/api/client.ts` — typed REST client (uses Vite proxy to `localhost:8000`)
 - `web/src/api/websocket.ts` — WebSocket hook for streaming events
@@ -193,6 +197,23 @@ npm run dev        # http://localhost:5173
 ```
 
 **Production API URL**: controlled by the `VITE_API_URL` env var (set in Cloudflare Pages → Settings → Environment variables). When empty (dev), Vite proxies to `localhost:8000`. In production it points to `https://langgraph-deepresearcher.fly.dev`. Both `client.ts` and `websocket.ts` read this var — `websocket.ts` replaces `http(s)` with `ws(s)` automatically.
+
+**Post-research chat UI**:
+- `PostResearchChat` renders below the `FinalReport` for completed sessions — teal styling, "ASK ME" label
+- `ChatView` tracks a local `chatMessages` state (separate from the `events` array) so chat Q&A renders below the report, not interleaved with research events
+- `chat_response` events from the WebSocket are picked up by a `useEffect` that watches `events` and appends new assistant messages to `chatMessages`
+- `markdownComponents.tsx` provides a shared ReactMarkdown `<a>` renderer (`target="_blank"`, `rel="nofollow noreferrer noopener"`) used in both `FinalReport` and chat response blocks
+- `SessionPage` passes `key={session.id}` to `<ChatView>` so state (including `chatMessages`) is fully reset when the user navigates to a different session
+
+**Post-research chat API flow**:
+```
+POST /sessions/{id}/chat  →  _chat_research_bg (background task)
+  →  research_service.chat_with_research()
+  →  agent.ainvoke({"messages": [HumanMessage]}, same thread_id)
+  →  LangGraph loads checkpoint  →  route_request sees final_report  →  chat_with_writer
+  →  writer model responds  →  CHAT_RESPONSE event emitted over WebSocket
+```
+Only available for sessions with `status == COMPLETED`; returns 400 otherwise.
 
 **IMPORTANT — zustand selector gotcha**:
 When returning a fallback collection from a store selector, use a **stable reference** declared outside the component (e.g. `const EMPTY_EVENTS: ResearchEvent[] = []`) — never inline `|| []`. Inline literals create a new array each render, which `useSyncExternalStore` detects as a state change, causing `Maximum update depth exceeded`. See `web/src/pages/SessionPage.tsx`.

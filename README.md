@@ -39,6 +39,7 @@ npm run dev                           # UI on http://localhost:5173
 
 - Backend: `api/` (FastAPI, SQLite persistence, WebSocket events, optional Prometheus metrics)
 - Frontend: `web/` (React 18, TypeScript, TailwindCSS, zustand, react-router)
+- **Post-research chat**: once the final report is ready, ask the writer follow-up questions — the writer answers using the full research context (notes, brief, report) and supports multi-turn conversation
 
 ## Environment
 
