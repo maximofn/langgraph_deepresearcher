@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { useCollapseAll } from './CollapseAllContext';
+import { markdownComponents } from './markdownComponents';
 
 interface FinalReportProps {
   markdown: string;
@@ -108,7 +109,7 @@ export function FinalReport({ markdown, filenameHint = 'report' }: FinalReportPr
       {!collapsed && (
         <div className="rounded-[10px] border border-[#1E1E1E] bg-[#111111] px-7 pt-6 pb-7">
           <div className="markdown-body">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{markdown}</ReactMarkdown>
           </div>
         </div>
       )}

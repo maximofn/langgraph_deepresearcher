@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronsDownUp, ChevronsUpDown, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { api } from '@/api/client';
+import { markdownComponents } from './markdownComponents';
 import type { ResearchEvent, Session } from '@/api/types';
 import { useSessionStore } from '@/state/sessionStore';
 import { ClarifyInput } from './ClarifyInput';
@@ -212,10 +214,10 @@ export function ChatView({ session, events }: ChatViewProps) {
                     style={{ borderLeftColor: '#4FC3F7AA', backgroundColor: '#0A0F15' }}
                   >
                     <div className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wide text-[#4FC3F7]">
-                      Writer
+                      Deep Researcher
                     </div>
-                    <div className="prose prose-invert prose-sm max-w-none">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    <div className="markdown-body">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{msg.content}</ReactMarkdown>
                     </div>
                   </div>
                 ),
