@@ -87,6 +87,8 @@ class ResearchService:
         db: Optional[AsyncSession] = None,
         models_config: Optional[Dict[str, str]] = None,
         api_keys: Optional[Dict[str, str]] = None,
+        max_iterations: Optional[int] = None,
+        max_concurrent_researchers: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Start a new research session for ``user_message``."""
         if db is not None:
@@ -101,13 +103,16 @@ class ResearchService:
         )
 
         agent = _get_writer_builder().compile(checkpointer=self.checkpointer_manager.get_checkpointer())
-        config = {
-            "configurable": {
-                "thread_id": thread_id,
-                "models": models_config or {},
-                "api_keys": api_keys or {},
-            }
+        configurable: Dict[str, Any] = {
+            "thread_id": thread_id,
+            "models": models_config or {},
+            "api_keys": api_keys or {},
         }
+        if max_iterations is not None:
+            configurable["max_iterations"] = max_iterations
+        if max_concurrent_researchers is not None:
+            configurable["max_concurrent_researchers"] = max_concurrent_researchers
+        config = {"configurable": configurable}
 
         try:
             with set_session_context(session_id):

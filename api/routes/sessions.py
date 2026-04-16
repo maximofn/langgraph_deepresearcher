@@ -47,6 +47,8 @@ async def _run_research_bg(session_id: str) -> None:
                 db=db_session,
                 models_config=session.models_config,
                 api_keys=api_keys,
+                max_iterations=session.max_iterations,
+                max_concurrent_researchers=session.max_concurrent_researchers,
             )
 
             if result["needs_clarification"]:
