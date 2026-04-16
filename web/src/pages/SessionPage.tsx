@@ -73,5 +73,5 @@ export function SessionPage() {
   if (!session) {
     return <div className="p-10 text-center text-neutral-500">Loading…</div>;
   }
-  return <ChatView session={session} events={events} />;
+  return <ChatView key={session.id} session={session} events={events} />;
 }
