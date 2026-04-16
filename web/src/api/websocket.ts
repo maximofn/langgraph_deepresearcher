@@ -25,13 +25,14 @@ export function useWebSocket({ sessionId, onEvent, enabled = true }: UseWebSocke
       return;
     }
 
+    const clientId = window.localStorage.getItem('deepresearch.client_id') ?? '';
     const apiUrl = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
     let url: string;
     if (apiUrl) {
-      url = `${apiUrl.replace(/^http/, 'ws')}/ws/${sessionId}`;
+      url = `${apiUrl.replace(/^http/, 'ws')}/ws/${sessionId}?client_id=${clientId}`;
     } else {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      url = `${proto}//${window.location.host}/ws/${sessionId}`;
+      url = `${proto}//${window.location.host}/ws/${sessionId}?client_id=${clientId}`;
     }
     const ws = new WebSocket(url);
     wsRef.current = ws;

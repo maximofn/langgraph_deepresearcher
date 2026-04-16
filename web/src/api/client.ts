@@ -13,11 +13,27 @@ import type {
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
+const CLIENT_ID_KEY = 'deepresearch.client_id';
+
+function getOrCreateClientId(): string {
+  let id = window.localStorage.getItem(CLIENT_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    try {
+      window.localStorage.setItem(CLIENT_ID_KEY, id);
+    } catch {
+      // localStorage not available — id won't persist across page loads
+    }
+  }
+  return id;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
+      'X-Client-ID': getOrCreateClientId(),
       ...(init?.headers || {}),
     },
   });

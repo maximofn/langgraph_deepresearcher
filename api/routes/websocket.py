@@ -4,11 +4,14 @@ WebSocket endpoint for real-time research updates.
 
 import asyncio
 import logging
+from typing import Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from api.database.db import db_session_context
 from api.models.events import WebSocketMessage
 from api.services.event_service import get_event_service
+from api.services.session_service import SessionService
 from api.websockets.connection_manager import get_connection_manager
 
 logger = logging.getLogger(__name__)
@@ -16,7 +19,11 @@ router = APIRouter()
 
 
 @router.websocket("/ws/{session_id}")
-async def websocket_endpoint(websocket: WebSocket, session_id: str):
+async def websocket_endpoint(
+    websocket: WebSocket,
+    session_id: str,
+    client_id: Optional[str] = None,
+):
     """
     WebSocket endpoint for real-time research updates.
 
@@ -31,6 +38,14 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
         websocket: WebSocket connection
         session_id: Unique session identifier
     """
+    # Verify session ownership before accepting the connection
+    async with db_session_context() as db:
+        svc = SessionService(db)
+        session = await svc.get_session(session_id)
+        if session is None or session.client_id != client_id:
+            await websocket.close(code=4403)
+            return
+
     connection_manager = get_connection_manager()
     event_service = get_event_service()
 

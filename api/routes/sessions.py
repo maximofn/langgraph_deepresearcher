@@ -5,11 +5,11 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.db import db_session_context, get_db
-from api.database.models import SessionStatus
+from api.database.models import Session, SessionStatus
 from api.models.requests import ContinueSessionRequest, CreateSessionRequest, ChatSessionRequest
 from api.models.responses import (
     CreateSessionResponse,
@@ -25,6 +25,25 @@ from api.utils.exceptions import InvalidSessionStateError, SessionNotFoundError
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+
+
+def require_client_id(x_client_id: str = Header(...)) -> str:
+    """Extract and require the X-Client-ID header."""
+    return x_client_id
+
+
+async def _get_owned_session(
+    session_id: str, client_id: str, svc: SessionService
+) -> Session:
+    """Fetch a session and verify it belongs to the given client_id.
+
+    Returns 404 in both cases (not found / wrong owner) to avoid leaking
+    the existence of sessions that belong to other clients.
+    """
+    session = await svc.get_session(session_id)
+    if session is None or session.client_id != client_id:
+        raise SessionNotFoundError(f"Session {session_id} not found")
+    return session
 
 
 async def _run_research_bg(session_id: str) -> None:
@@ -117,11 +136,13 @@ async def _continue_research_bg(
 async def create_session(
     request: CreateSessionRequest,
     db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
 ):
     """Create a new research session."""
     svc = SessionService(db)
     session = await svc.create_session(
         initial_query=request.query,
+        client_id=client_id,
         max_iterations=request.max_iterations,
         max_concurrent_researchers=request.max_concurrent_researchers,
         models_config=request.models,
@@ -146,13 +167,11 @@ async def start_research(
     session_id: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
 ):
     """Start research for a session (runs in background)."""
     svc = SessionService(db)
-    session = await svc.get_session(session_id)
-
-    if session is None:
-        raise SessionNotFoundError(f"Session {session_id} not found")
+    session = await _get_owned_session(session_id, client_id, svc)
 
     if session.status != SessionStatus.CREATED:
         raise InvalidSessionStateError(
@@ -196,13 +215,11 @@ async def provide_clarification(
     request: ContinueSessionRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
 ):
     """Provide clarification and continue research."""
     svc = SessionService(db)
-    session = await svc.get_session(session_id)
-
-    if session is None:
-        raise SessionNotFoundError(f"Session {session_id} not found")
+    session = await _get_owned_session(session_id, client_id, svc)
 
     if session.status != SessionStatus.CLARIFICATION_NEEDED:
         raise InvalidSessionStateError("Session does not need clarification")
@@ -229,13 +246,11 @@ async def chat_with_session(
     request: ChatSessionRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
 ):
     """Envía una pregunta de seguimiento al writer (solo sesiones COMPLETED)."""
     svc = SessionService(db)
-    session = await svc.get_session(session_id)
-
-    if session is None:
-        raise SessionNotFoundError(f"Session {session_id} not found")
+    session = await _get_owned_session(session_id, client_id, svc)
 
     if session.status != SessionStatus.COMPLETED:
         raise InvalidSessionStateError(
@@ -252,44 +267,53 @@ async def chat_with_session(
 
 
 @router.get("/{session_id}", response_model=SessionResponse)
-async def get_session(session_id: str, db: AsyncSession = Depends(get_db)):
+async def get_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
+):
     """Get session details."""
     svc = SessionService(db)
-    session = await svc.get_session(session_id)
-    if session is None:
-        raise SessionNotFoundError(f"Session {session_id} not found")
+    session = await _get_owned_session(session_id, client_id, svc)
     return SessionResponse.model_validate(session)
 
 
 @router.get("/{session_id}/messages", response_model=List[MessageResponse])
-async def get_session_messages(session_id: str, db: AsyncSession = Depends(get_db)):
+async def get_session_messages(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
+):
     """Get all messages for a session."""
     svc = SessionService(db)
-    session = await svc.get_session(session_id)
-    if session is None:
-        raise SessionNotFoundError(f"Session {session_id} not found")
-
+    await _get_owned_session(session_id, client_id, svc)
     messages = await svc.get_session_messages(session_id)
     return [MessageResponse.model_validate(msg) for msg in messages]
 
 
 @router.delete("/{session_id}", status_code=204)
-async def delete_session(session_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_session(
+    session_id: str,
+    db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
+):
     """Delete a session and cascade its messages + events."""
     svc = SessionService(db)
-    removed = await svc.delete_session(session_id)
-    if not removed:
-        raise SessionNotFoundError(f"Session {session_id} not found")
+    await _get_owned_session(session_id, client_id, svc)
+    await svc.delete_session(session_id)
     return Response(status_code=204)
 
 
 @router.get("/", response_model=SessionListResponse)
 async def list_sessions(
-    limit: int = 50, offset: int = 0, db: AsyncSession = Depends(get_db)
+    limit: int = 50,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_db),
+    client_id: str = Depends(require_client_id),
 ):
-    """List all sessions with pagination."""
+    """List sessions for the requesting client."""
     svc = SessionService(db)
-    sessions = await svc.list_sessions(limit=limit, offset=offset)
+    sessions = await svc.list_sessions(client_id=client_id, limit=limit, offset=offset)
     return SessionListResponse(
         sessions=[SessionResponse.model_validate(s) for s in sessions],
         total=len(sessions),

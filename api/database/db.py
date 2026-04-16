@@ -60,6 +60,13 @@ async def init_db():
             await conn.execute(
                 text("ALTER TABLE sessions ADD COLUMN user_email VARCHAR(320)")
             )
+        if "client_id" not in existing_sessions_cols:
+            await conn.execute(
+                text("ALTER TABLE sessions ADD COLUMN client_id VARCHAR(36)")
+            )
+            await conn.execute(
+                text("CREATE INDEX IF NOT EXISTS ix_sessions_client_id ON sessions (client_id)")
+            )
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

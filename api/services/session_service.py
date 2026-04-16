@@ -21,6 +21,7 @@ class SessionService:
     async def create_session(
         self,
         initial_query: str,
+        client_id: str,
         max_iterations: int = 6,
         max_concurrent_researchers: int = 3,
         models_config: Optional[Dict[str, str]] = None,
@@ -31,6 +32,7 @@ class SessionService:
         session = Session(
             id=str(uuid4()),
             thread_id=str(uuid4()),
+            client_id=client_id,
             initial_query=initial_query,
             status=SessionStatus.CREATED,
             max_iterations=max_iterations,
@@ -99,10 +101,14 @@ class SessionService:
         return list(result.scalars().all())
 
     async def list_sessions(
-        self, limit: int = 50, offset: int = 0, status: Optional[SessionStatus] = None
+        self,
+        client_id: str,
+        limit: int = 50,
+        offset: int = 0,
+        status: Optional[SessionStatus] = None,
     ) -> List[Session]:
-        """List all sessions with pagination and optional filtering"""
-        query = select(Session).order_by(Session.created_at.desc())
+        """List sessions for a given client_id with pagination and optional filtering"""
+        query = select(Session).where(Session.client_id == client_id).order_by(Session.created_at.desc())
 
         if status:
             query = query.where(Session.status == status)

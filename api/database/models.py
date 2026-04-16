@@ -25,6 +25,7 @@ class Session(Base):
 
     id = Column(String(36), primary_key=True)  # UUID
     thread_id = Column(String(36), unique=True, nullable=False)  # LangGraph thread ID
+    client_id = Column(String(36), nullable=True, index=True)  # Device-scoped UUID from frontend
     status = Column(SQLEnum(SessionStatus), default=SessionStatus.CREATED)
 
     # User input
