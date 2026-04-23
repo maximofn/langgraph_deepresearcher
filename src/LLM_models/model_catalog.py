@@ -292,10 +292,19 @@ def get_role_model(role: str, config: Optional[RunnableConfig] = None) -> BaseCh
 
     kwargs = resolve_model_config(model_name, role=role, api_keys=api_keys)
 
-    if not kwargs.get("api_key"):
-        entry = _lookup_catalog_entry(model_name) or {}
+    entry = _lookup_catalog_entry(model_name) or {}
+    env_name = entry.get("api_key_env", "unknown")
+    has_key = bool(kwargs.get("api_key"))
+    import logging as _logging
+    _logging.getLogger(__name__).info(
+        "get_role_model role=%s model=%s env=%s key_found=%s (from_config=%s from_env=%s)",
+        role, model_name, env_name, has_key,
+        bool(api_keys and api_keys.get(env_name)),
+        bool(os.getenv(env_name)),
+    )
+
+    if not has_key:
         provider = entry.get("provider", "unknown")
-        env_name = entry.get("api_key_env", "unknown")
         raise ValueError(
             f"Missing API key for model '{model_name}' (provider "
             f"'{provider}', env {env_name}). "

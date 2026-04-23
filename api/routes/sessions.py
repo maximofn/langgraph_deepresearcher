@@ -57,6 +57,11 @@ async def _run_research_bg(session_id: str) -> None:
             return
 
         api_keys = ResearchService.pop_api_keys(session_id)
+        logger.info(
+            "Starting research for session %s — api_keys present: %s",
+            session_id,
+            sorted(api_keys.keys()) if api_keys else None,
+        )
 
         try:
             result = await research_service.start_research(
@@ -105,6 +110,11 @@ async def _continue_research_bg(
             logger.error("Background task: session %s vanished", session_id)
             return
 
+        logger.info(
+            "Continuing research for session %s — api_keys present: %s",
+            session_id,
+            sorted(api_keys.keys()) if api_keys else None,
+        )
         try:
             result = await research_service.continue_with_clarification(
                 session_id=session.id,
