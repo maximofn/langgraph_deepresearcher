@@ -17,7 +17,7 @@ anything.
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables import RunnableConfig
@@ -313,6 +313,29 @@ def get_role_model(role: str, config: Optional[RunnableConfig] = None) -> BaseCh
         )
 
     return initialize_model(**kwargs)
+
+
+def check_missing_keys(
+    models_config: Optional[Dict[str, str]],
+    api_keys: Optional[Dict[str, str]],
+) -> List[Dict[str, str]]:
+    """Return missing-key issues for the given model/key config.
+
+    Each item in the returned list has 'role', 'model', and 'env_var'.
+    An empty list means all required keys are available (from api_keys or env).
+    """
+    missing = []
+    for role in ROLES:
+        model_name = (models_config or {}).get(role) or DEFAULT_MODELS_BY_ROLE.get(role)
+        if not model_name:
+            continue
+        entry = _lookup_catalog_entry(model_name)
+        if not entry:
+            continue
+        env_name = entry["api_key_env"]
+        if not get_api_key_for_provider(env_name, api_keys=api_keys):
+            missing.append({"role": role, "model": model_name, "env_var": env_name})
+    return missing
 
 
 def list_available_models() -> Dict[str, Dict[str, Any]]:

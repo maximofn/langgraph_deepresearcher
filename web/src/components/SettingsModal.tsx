@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { X, ArrowUp, Sparkles } from 'lucide-react';
 import { ApiKeysSection, ModelsSection, UserInfoSection } from './SettingsSections';
+import { useSessionStore } from '@/state/sessionStore';
 
 interface SettingsModalProps {
   open: boolean;
@@ -25,6 +26,11 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const selectedModels = useSessionStore((s) => s.selectedModels);
+  const apiKeys = useSessionStore((s) => s.apiKeys);
+  const modelsCatalog = useSessionStore((s) => s.modelsCatalog);
+  const discoveredCatalog = useSessionStore((s) => s.discoveredCatalog);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -37,8 +43,31 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!query.trim() || submitting) return;
-    setSubmitting(true);
     setError(null);
+
+    const effectiveCatalog = discoveredCatalog ?? modelsCatalog;
+    if (effectiveCatalog) {
+      const filledEnvs = new Set(
+        Object.entries(apiKeys).filter(([, v]) => v && v.trim().length > 0).map(([k]) => k),
+      );
+      const missingModels = effectiveCatalog.roles
+        .map((role) => {
+          const modelName = selectedModels[role];
+          if (!modelName) return null;
+          const model = effectiveCatalog.models.find((m) => m.name === modelName);
+          if (model && !filledEnvs.has(model.api_key_env)) return model.label;
+          return null;
+        })
+        .filter(Boolean) as string[];
+
+      if (missingModels.length > 0) {
+        const unique = [...new Set(missingModels)];
+        setError(`API key missing for: ${unique.join(', ')}. Add your keys above before starting.`);
+        return;
+      }
+    }
+
+    setSubmitting(true);
     try {
       await onSubmit({
         query: query.trim(),

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database.db import db_session_context, get_db
@@ -22,6 +22,10 @@ from api.services.email_service import send_report_email
 from api.services.research_service import ResearchService
 from api.services.session_service import SessionService
 from api.utils.exceptions import InvalidSessionStateError, SessionNotFoundError
+from api.utils.paths import ensure_src_on_path
+
+ensure_src_on_path()
+from LLM_models.model_catalog import check_missing_keys  # type: ignore[import-not-found]
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -149,6 +153,14 @@ async def create_session(
     client_id: str = Depends(require_client_id),
 ):
     """Create a new research session."""
+    missing = check_missing_keys(request.models, request.api_keys)
+    if missing:
+        details = ", ".join(
+            f"{m['role']} uses {m['model']} but {m['env_var']} is not set"
+            for m in missing
+        )
+        raise HTTPException(status_code=422, detail=f"Missing API keys: {details}")
+
     svc = SessionService(db)
     session = await svc.create_session(
         initial_query=request.query,

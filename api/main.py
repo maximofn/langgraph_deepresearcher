@@ -163,7 +163,7 @@ app.include_router(websocket.router)
 async def root():
     return {
         "message": settings.app_name,
-        "version": "1.0.0",
+        "version": "1.1.0",
         "docs": "/docs",
         "websocket": "/ws/{session_id}",
     }
@@ -171,7 +171,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": settings.app_name, "version": "1.0.0"}
+    return {"status": "healthy", "service": settings.app_name, "version": "1.1.0"}
 
 
 if __name__ == "__main__":

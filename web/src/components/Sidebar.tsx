@@ -185,7 +185,7 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
 
       {/* Version */}
       <div className="px-4 pb-1 text-right font-mono text-[10px] text-[#3A3A3A]">
-        v1.0.0
+        v1.1.0
       </div>
 
       {/* User footer */}
