@@ -95,6 +95,21 @@ const ROLE_LABELS: Record<string, string> = {
   writer: 'Writer',
 };
 
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+  scope:
+    'Clarifies your request and turns the conversation into a structured research brief.',
+  supervisor:
+    'Breaks the brief into topics and delegates them to parallel research sub-agents.',
+  research:
+    'Runs iterative web searches on an assigned topic and gathers raw findings.',
+  compress:
+    'Compresses each sub-agent’s raw notes into a concise summary for the supervisor.',
+  summarization:
+    'Summarizes individual search results to keep the research context lean.',
+  writer:
+    'Synthesizes all compressed findings into the final markdown report.',
+};
+
 export function ApiKeysSection() {
   const apiKeys = useSessionStore((s) => s.apiKeys);
   const setApiKeys = useSessionStore((s) => s.setApiKeys);
@@ -275,7 +290,7 @@ export function ModelsSection() {
       </label>
 
       <img
-        src="https://images.maximofn.com/DeepResearcher-architecture.webp"
+        src="https://images.maximofn.com/DeepResearcher-architecture-all-models.webp"
         alt="DeepResearcher agent architecture"
         className="w-full rounded-[8px] object-contain"
         style={{ border: '1px solid #1A1A1A' }}
@@ -336,6 +351,17 @@ export function ModelsSection() {
               <span style={{ fontSize: '12px', color: '#AAAAAA' }}>
                 {ROLE_LABELS[role] ?? role}
               </span>
+              {ROLE_DESCRIPTIONS[role] && (
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: '#666666',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {ROLE_DESCRIPTIONS[role]}
+                </span>
+              )}
               <select
                 value={selectedModels[role] ?? ''}
                 onChange={(e) => handleModelChange(role, e.target.value)}

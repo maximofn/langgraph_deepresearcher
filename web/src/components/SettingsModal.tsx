@@ -167,6 +167,11 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
                   {maxIterations}
                 </span>
               </div>
+              <p style={{ fontSize: '12px', color: '#777777', lineHeight: 1.4 }}>
+                Maximum number of supervisor cycles. Each cycle can delegate new
+                research topics or refine previous ones. Higher values allow
+                deeper exploration at the cost of more tokens and longer runs.
+              </p>
               <input
                 type="range"
                 min={1}
@@ -190,6 +195,11 @@ export function SettingsModal({ open, onClose, onSubmit }: SettingsModalProps) {
                   {maxConcurrent}
                 </span>
               </div>
+              <p style={{ fontSize: '12px', color: '#777777', lineHeight: 1.4 }}>
+                How many research sub-agents the supervisor can run in parallel.
+                Higher values speed up broad topics but use more API quota and
+                may hit rate limits.
+              </p>
               <input
                 type="range"
                 min={1}
