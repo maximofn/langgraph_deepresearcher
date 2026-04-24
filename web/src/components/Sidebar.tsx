@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { BrainCircuit, Plus, Search, Settings, Trash2 } from 'lucide-react';
+import { BrainCircuit, Plus, Search, Settings, Trash2, X } from 'lucide-react';
 
 import { api } from '@/api/client';
 import type { SessionStatus } from '@/api/types';
@@ -35,11 +35,13 @@ function formatRelative(iso: string): string {
 }
 
 interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
   onNewResearch: () => void;
   onOpenPreferences: () => void;
 }
 
-export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, onNewResearch, onOpenPreferences }: SidebarProps) {
   const sessions = useSessionStore((s) => s.sessions);
   const removeSession = useSessionStore((s) => s.removeSession);
   const userInfo = useSessionStore((s) => s.userInfo);
@@ -63,36 +65,63 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
     try {
       await api.deleteSession(id);
       removeSession(id);
-      if (activeId === id) navigate('/');
+      if (activeId === id) {
+        navigate('/');
+        onClose();
+      }
     } catch (err) {
       console.error('delete failed', err);
       alert('Failed to delete session');
     }
   };
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    onClose();
+  };
+
+  const handleNewResearch = () => {
+    onNewResearch();
+    onClose();
+  };
+
   return (
-    <aside className="flex h-full w-80 flex-col overflow-hidden bg-terminal-bg">
+    <aside
+      className={`fixed inset-y-0 left-0 z-40 flex h-full w-80 max-w-[85vw] flex-col overflow-hidden border-r border-terminal-border bg-terminal-bg transition-transform duration-200 ease-out md:static md:max-w-none md:translate-x-0 md:border-r-0 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
       {/* Brand + actions */}
       <div className="flex flex-col gap-4 px-4 pb-4 pt-6">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-3 transition-opacity hover:opacity-80"
-        >
-          <div
-            className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#00FF0040]"
-            style={{
-              background: 'linear-gradient(135deg, #00FF0030, #00FF0008)',
-            }}
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={() => handleNavigate('/')}
+            className="flex items-center gap-3 transition-opacity hover:opacity-80"
           >
-            <BrainCircuit size={16} className="text-[#00FF00]" />
-          </div>
-          <span className="font-sans text-[15px] font-semibold text-white">
-            Deep Researcher
-          </span>
-        </button>
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-[8px] border border-[#00FF0040]"
+              style={{
+                background: 'linear-gradient(135deg, #00FF0030, #00FF0008)',
+              }}
+            >
+              <BrainCircuit size={16} className="text-[#00FF00]" />
+            </div>
+            <span className="font-sans text-[15px] font-semibold text-white">
+              Deep Researcher
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1 text-[#666666] hover:text-[#CCCCCC] md:hidden"
+            aria-label="Close sidebar"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
         <button
-          onClick={onNewResearch}
+          onClick={handleNewResearch}
           className="flex h-10 w-full items-center justify-center gap-2 rounded-[8px] bg-[#00FF00] font-sans text-sm font-semibold text-black transition-[filter] hover:brightness-110"
         >
           <Plus size={16} strokeWidth={2.5} /> New Research
@@ -143,7 +172,7 @@ export function Sidebar({ onNewResearch, onOpenPreferences }: SidebarProps) {
           return (
             <div
               key={s.id}
-              onClick={() => navigate(`/session/${s.id}`)}
+              onClick={() => handleNavigate(`/session/${s.id}`)}
               className={`group relative cursor-pointer rounded-[8px] p-3 transition-colors ${
                 active
                   ? 'bg-[#00FF0005] border border-[#00FF0015]'

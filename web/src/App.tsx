@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Menu } from 'lucide-react';
 
 import { api } from './api/client';
 import { PreferencesModal } from './components/PreferencesModal';
@@ -12,6 +13,7 @@ import { useSessionStore } from './state/sessionStore';
 export default function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const setSessions = useSessionStore((s) => s.setSessions);
   const upsertSession = useSessionStore((s) => s.upsertSession);
   const setModelsCatalog = useSessionStore((s) => s.setModelsCatalog);
@@ -67,12 +69,32 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="relative flex h-screen w-screen overflow-hidden">
+      {/* Mobile backdrop */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+          aria-hidden="true"
+        />
+      )}
+
       <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         onNewResearch={() => setModalOpen(true)}
         onOpenPreferences={() => setPrefsOpen(true)}
       />
-      <main className="flex-1 overflow-hidden">
+      <main className="relative flex-1 overflow-hidden">
+        {/* Mobile menu button (hidden on md+) */}
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="fixed left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-[8px] border border-terminal-border bg-terminal-surface text-terminal-textPrimary shadow-lg transition-colors hover:bg-[#1A1A1A] md:hidden"
+          aria-label="Open sidebar"
+        >
+          <Menu size={18} />
+        </button>
         <Routes>
           <Route path="/" element={<HomePage onNewResearch={() => setModalOpen(true)} />} />
           <Route path="/session/:id" element={<SessionPage />} />

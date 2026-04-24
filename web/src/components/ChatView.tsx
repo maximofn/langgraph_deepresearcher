@@ -148,7 +148,7 @@ export function ChatView({ session, events }: ChatViewProps) {
   return (
     <CollapseAllProvider>
       <div className="flex h-full flex-col bg-terminal-bg">
-        <header className="flex items-center justify-between gap-4 border-b border-[#1A1A1A] bg-[#0D0D0D] px-6 py-4">
+        <header className="flex items-center justify-between gap-4 border-b border-[#1A1A1A] bg-[#0D0D0D] py-4 pl-14 pr-6 md:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <div className="truncate font-sans text-[16px] font-medium leading-[1.3] text-white">
               {session.initial_query}
