@@ -2,12 +2,12 @@
 
 # 🔍 LangGraph Deep Researcher
 
-**A multi-agent research system that plans, searches, compresses and writes — so you don't have to.**
+**A multi-agent research system that plans, searches, compresses and writes, so you don't have to.**
 
 A supervisor agent breaks your question into topics, launches research sub-agents in parallel,
 compresses their findings and hands everything to a writer agent that produces a sourced markdown report.
 
-### [**▶ Try the live demo — deepresearcher.maximofn.com**](https://deepresearcher.maximofn.com/)
+### [**▶ Try the live demo, deepresearcher.maximofn.com**](https://deepresearcher.maximofn.com/)
 
 [![Live Demo](https://img.shields.io/badge/demo-online-00FF00?style=flat-square&logo=googlechrome&logoColor=white)](https://deepresearcher.maximofn.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-0.6+-1C3C3C?style=flat-square)](https://github.com/langchain-ai/langgraph)
@@ -34,10 +34,10 @@ agent and its own context window:
 | | |
 |---|---|
 | 🧭 **Scope** | Asks clarifying questions when your request is ambiguous, then turns the conversation into a structured research brief. |
-| 🧠 **Supervisor** | Splits the brief into topics and delegates them to sub-agents — up to `max_concurrent_researchers` in parallel, over `max_iterations` cycles. |
+| 🧠 **Supervisor** | Splits the brief into topics and delegates them to sub-agents, up to `max_concurrent_researchers` in parallel, over `max_iterations` cycles. |
 | 🔬 **Researchers** | Iterative Tavily web search (or your local filesystem via MCP) with a `think_tool` for strategic planning between searches. |
 | 🗜️ **Compress** | Each sub-agent's raw notes are compressed before they ever reach the supervisor, keeping context lean. |
-| ✍️ **Writer** | Synthesizes every compressed finding into a final markdown report — and stays available for follow-up questions afterwards. |
+| ✍️ **Writer** | Synthesizes every compressed finding into a final markdown report, and stays available for follow-up questions afterwards. |
 
 <div align="center">
 <img src="assets/DeepResearcher-architecture-all-models.webp" alt="Architecture: Scope → Supervisor → parallel Researchers with Compress and Summarization → Writer" width="720">
@@ -45,15 +45,15 @@ agent and its own context window:
 
 ## Features
 
-- **🔀 Parallel research** — `asyncio.gather()` fans out sub-agents; the supervisor aggregates their compressed notes.
-- **💬 Clarification loop** — the scope agent asks before it guesses, so the brief actually matches your intent.
-- **📡 Live streaming** — every agent thought, tool call and search result streams to the UI over WebSockets while the research runs.
-- **🗣️ Post-research chat** — once the report is ready, keep asking questions; the writer answers with the full research context (notes + brief + report) loaded from the LangGraph checkpoint.
-- **🔑 Bring your own keys** — API keys are stored in your browser, sent over HTTPS per request and never persisted server-side.
-- **🎛️ Per-role model picking** — assign a different model to each agent role (scope, supervisor, research, compress, summarization, writer) from the UI.
-- **📬 Email delivery** — optionally get the finished report in your inbox.
-- **🛠️ MCP support** — swap web search for local filesystem research via Model Context Protocol.
-- **💾 Persistence** — sessions, messages and events stored in SQLite; reload any past investigation.
+- **🔀 Parallel research**, `asyncio.gather()` fans out sub-agents; the supervisor aggregates their compressed notes.
+- **💬 Clarification loop**, the scope agent asks before it guesses, so the brief actually matches your intent.
+- **📡 Live streaming**, every agent thought, tool call and search result streams to the UI over WebSockets while the research runs.
+- **🗣️ Post-research chat**, once the report is ready, keep asking questions; the writer answers with the full research context (notes + brief + report) loaded from the LangGraph checkpoint.
+- **🔑 Bring your own keys**, API keys are stored in your browser, sent over HTTPS per request and never persisted server-side.
+- **🎛️ Per-role model picking**, assign a different model to each agent role (scope, supervisor, research, compress, summarization, writer) from the UI.
+- **📬 Email delivery**, optionally get the finished report in your inbox.
+- **🛠️ MCP support**, swap web search for local filesystem research via Model Context Protocol.
+- **💾 Persistence**, sessions, messages and events stored in SQLite; reload any past investigation.
 
 <div align="center">
 <img src="assets/screenshot-new-research.png" alt="New research dialog with iteration and concurrency controls" width="560">
@@ -63,7 +63,7 @@ agent and its own context window:
 
 ### 1. Just use the demo
 
-👉 **[deepresearcher.maximofn.com](https://deepresearcher.maximofn.com/)** — add your own API keys in *Preferences* and start researching. Nothing to install.
+👉 **[deepresearcher.maximofn.com](https://deepresearcher.maximofn.com/)**, add your own API keys in *Preferences* and start researching. Nothing to install.
 
 ### 2. Run it locally
 
@@ -74,10 +74,10 @@ cd langgraph_deepresearcher
 uv sync                                # install dependencies
 cp .env.example .env                   # add your API keys
 
-# Backend — API on http://localhost:8000
+# Backend, API on http://localhost:8000
 docker compose up --build -d
 
-# Frontend — UI on http://localhost:5173
+# Frontend, UI on http://localhost:5173
 cd web && npm install && npm run dev
 ```
 
@@ -90,7 +90,7 @@ python src/langgraph_deepresearch.py
 
 ## Configuration
 
-Create a `.env` with the providers you plan to use — you only need keys for the models you actually assign:
+Create a `.env` with the providers you plan to use, you only need keys for the models you actually assign:
 
 ```bash
 OPENAI_API_KEY=        # GPT-4.1 / GPT-5 family
@@ -169,7 +169,7 @@ Inspired by LangChain's [*Deep Research from Scratch*](https://github.com/langch
 
 ## License
 
-[Apache 2.0](LICENSE) — by [MaximoFN](https://github.com/maximofn)
+[Apache 2.0](LICENSE), by [MaximoFN](https://github.com/maximofn)
 
 ---
 
