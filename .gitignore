@@ -27,3 +27,6 @@ src/langgraph_deepresearcher.egg-info
 web/node_modules/
 web/dist/
 web/.vite/
+
+# Personal notes
+TODO.md
