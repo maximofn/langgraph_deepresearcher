@@ -1,15 +1,30 @@
 """REST endpoints for session management."""
 
-from __future__ import annotations
+# NOTE: deliberately no `from __future__ import annotations` here.
+# With PEP 563 the annotations stay strings, and FastAPI resolves them through
+# the globals of whatever function object it receives. Once @limiter.limit wraps
+# an endpoint, that is slowapi's module — where CreateSessionRequest does not
+# exist — so the body model silently degrades into a query parameter and every
+# POST fails with "Field required". Evaluating annotations eagerly avoids it.
 
 import logging
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Response
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.config import settings
 from api.database.db import db_session_context, get_db
 from api.database.models import Session, SessionStatus
+from api.rate_limit import limiter
 from api.models.requests import ContinueSessionRequest, CreateSessionRequest, ChatSessionRequest
 from api.models.responses import (
     CreateSessionResponse,
@@ -127,6 +142,8 @@ async def _continue_research_bg(
                 db=db_session,
                 models_config=session.models_config,
                 api_keys=api_keys,
+                max_iterations=session.max_iterations,
+                max_concurrent_researchers=session.max_concurrent_researchers,
             )
             await svc.update_session_status(
                 session_id,
@@ -147,13 +164,15 @@ async def _continue_research_bg(
 
 
 @router.post("/", response_model=CreateSessionResponse)
+@limiter.limit(settings.rate_limit_create_session)
 async def create_session(
-    request: CreateSessionRequest,
+    request: Request,
+    payload: CreateSessionRequest,
     db: AsyncSession = Depends(get_db),
     client_id: str = Depends(require_client_id),
 ):
     """Create a new research session."""
-    missing = check_missing_keys(request.models, request.api_keys)
+    missing = check_missing_keys(payload.models, payload.api_keys)
     if missing:
         details = ", ".join(
             f"{m['role']} uses {m['model']} but {m['env_var']} is not set"
@@ -163,20 +182,20 @@ async def create_session(
 
     svc = SessionService(db)
     session = await svc.create_session(
-        initial_query=request.query,
+        initial_query=payload.query,
         client_id=client_id,
-        max_iterations=request.max_iterations,
-        max_concurrent_researchers=request.max_concurrent_researchers,
-        models_config=request.models,
-        user_name=request.user_name,
-        user_email=request.user_email,
+        max_iterations=payload.max_iterations,
+        max_concurrent_researchers=payload.max_concurrent_researchers,
+        models_config=payload.models,
+        user_name=payload.user_name,
+        user_email=payload.user_email,
     )
 
     # User-supplied API keys are parked in memory keyed by session id and
     # consumed by the background task when research starts. They are NEVER
     # persisted to the database or to logs.
-    if request.api_keys:
-        ResearchService.stash_api_keys(session.id, request.api_keys)
+    if payload.api_keys:
+        ResearchService.stash_api_keys(session.id, payload.api_keys)
 
     return CreateSessionResponse(
         session=SessionResponse.model_validate(session),
@@ -185,7 +204,9 @@ async def create_session(
 
 
 @router.post("/{session_id}/start", response_model=StartResearchResponse)
+@limiter.limit(settings.rate_limit_start_research)
 async def start_research(
+    request: Request,
     session_id: str,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
@@ -210,7 +231,11 @@ async def start_research(
     )
 
 
-async def _chat_research_bg(session_id: str, message: str) -> None:
+async def _chat_research_bg(
+    session_id: str,
+    message: str,
+    api_keys: Optional[dict] = None,
+) -> None:
     """Background task: envía una pregunta al writer en una sesión completada."""
     research_service = ResearchService()
     async with db_session_context() as db_session:
@@ -226,15 +251,18 @@ async def _chat_research_bg(session_id: str, message: str) -> None:
                 message=message,
                 db=db_session,
                 models_config=session.models_config,
+                api_keys=api_keys,
             )
         except Exception:
             logger.exception("Chat failed for session %s", session_id)
 
 
 @router.post("/{session_id}/clarify", response_model=StartResearchResponse)
+@limiter.limit(settings.rate_limit_start_research)
 async def provide_clarification(
+    request: Request,
     session_id: str,
-    request: ContinueSessionRequest,
+    payload: ContinueSessionRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     client_id: str = Depends(require_client_id),
@@ -249,10 +277,10 @@ async def provide_clarification(
     await svc.update_session_status(
         session_id,
         SessionStatus.ACTIVE,
-        clarification_response=request.clarification,
+        clarification_response=payload.clarification,
     )
     background_tasks.add_task(
-        _continue_research_bg, session_id, request.clarification, request.api_keys
+        _continue_research_bg, session_id, payload.clarification, payload.api_keys
     )
 
     return StartResearchResponse(
@@ -263,9 +291,11 @@ async def provide_clarification(
 
 
 @router.post("/{session_id}/chat", response_model=StartResearchResponse)
+@limiter.limit(settings.rate_limit_start_research)
 async def chat_with_session(
+    request: Request,
     session_id: str,
-    request: ChatSessionRequest,
+    payload: ChatSessionRequest,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
     client_id: str = Depends(require_client_id),
@@ -279,7 +309,9 @@ async def chat_with_session(
             f"Chat solo disponible en sesiones completadas (status: {session.status.value})"
         )
 
-    background_tasks.add_task(_chat_research_bg, session_id, request.message)
+    background_tasks.add_task(
+        _chat_research_bg, session_id, payload.message, payload.api_keys
+    )
 
     return StartResearchResponse(
         status="processing",

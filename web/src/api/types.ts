@@ -146,6 +146,7 @@ export interface PersistedMessage {
 
 export interface ChatSessionRequest {
   message: string;
+  api_keys?: ApiKeysMap;
 }
 
 export interface ApiError {

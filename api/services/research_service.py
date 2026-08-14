@@ -141,6 +141,8 @@ class ResearchService:
         db: Optional[AsyncSession] = None,
         models_config: Optional[Dict[str, str]] = None,
         api_keys: Optional[Dict[str, str]] = None,
+        max_iterations: Optional[int] = None,
+        max_concurrent_researchers: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Resume a paused research run after the user clarifies."""
         if db is not None:
@@ -149,13 +151,19 @@ class ResearchService:
         # Same thread_id => LangGraph resumes from the checkpointed state and
         # merges the new HumanMessage into the existing message list.
         agent = _get_writer_builder().compile(checkpointer=self.checkpointer_manager.get_checkpointer())
-        config = {
-            "configurable": {
-                "thread_id": thread_id,
-                "models": models_config or {},
-                "api_keys": api_keys or {},
-            }
+        configurable = {
+            "thread_id": thread_id,
+            "models": models_config or {},
+            "api_keys": api_keys or {},
         }
+        # The clarification run is the one that actually researches, so it must
+        # carry the user's limits. Dropping them here silently reverts to the
+        # module defaults and bills the user for a longer run than they asked.
+        if max_iterations is not None:
+            configurable["max_iterations"] = max_iterations
+        if max_concurrent_researchers is not None:
+            configurable["max_concurrent_researchers"] = max_concurrent_researchers
+        config = {"configurable": configurable}
 
         try:
             with set_session_context(session_id):

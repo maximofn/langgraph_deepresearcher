@@ -219,8 +219,12 @@ async def supervisor_tools(state: SupervisorState, config: RunnableConfig) -> Co
         next_step = "supervisor"  # Default next step
         should_end = False
 
-        # Check exit criteria first
-        exceeded_iterations = research_iterations >= effective_max_iterations
+        # Check exit criteria first.
+        # NOTE: the supervisor node already counted the ConductResearch call that
+        # is about to be executed, so `research_iterations` includes the pending
+        # round. Comparing with `>=` would reject that round before running it,
+        # and max_iterations=1 would mean "never research at all".
+        exceeded_iterations = research_iterations > effective_max_iterations
         no_tool_calls = not most_recent_message.tool_calls
         research_complete = any(
             tool_call["name"] == "ResearchComplete" 

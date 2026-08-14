@@ -43,6 +43,10 @@ def route_request(state: AgentState) -> Command[Literal["clarify_with_user", "ch
 
 # ===== FINAL REPORT GENERATION =====
 
+class NoResearchFindingsError(RuntimeError):
+    """Raised when the writer is asked to report on an empty research phase."""
+
+
 async def final_report_generation(state: AgentState, config: RunnableConfig):
     """
     Final report generation node.
@@ -52,10 +56,21 @@ async def final_report_generation(state: AgentState, config: RunnableConfig):
 
     notes = state.get("notes", [])
 
+    findings = "\n".join(note for note in notes if note and note.strip())
+
+    # Guard: with no findings the model would happily write a plausible report
+    # out of its own priors — complete with invented sources. A research system
+    # that fabricates is worse than one that admits it has nothing, so refuse
+    # to write instead of handing back something that merely looks researched.
+    if not findings.strip():
+        raise NoResearchFindingsError(
+            "The research phase produced no findings, so no report can be written. "
+            "This usually means the supervisor never executed a ConductResearch "
+            "call (check max_iterations) or every sub-agent failed."
+        )
+
     # Build the per-session writer model from RunnableConfig
     writer_model = get_role_model("writer", config)
-
-    findings = "\n".join(notes)
 
     final_report_prompt = final_report_generation_prompt.format(
         research_brief=state.get("research_brief", ""),

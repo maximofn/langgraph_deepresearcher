@@ -132,7 +132,14 @@ export function ChatView({ session, events }: ChatViewProps) {
     // Optimistically add the user message to the local chat history
     setChatMessages((prev) => [...prev, { role: 'user', content: message }]);
     try {
-      await api.chat(session.id, message);
+      const nonEmpty = Object.fromEntries(
+        Object.entries(apiKeys).filter(([, v]) => v && v.trim().length > 0),
+      );
+      await api.chat(
+        session.id,
+        message,
+        Object.keys(nonEmpty).length > 0 ? nonEmpty : undefined,
+      );
     } catch (err) {
       const msg = err && typeof err === 'object' && 'message' in err
         ? String((err as { message: unknown }).message)

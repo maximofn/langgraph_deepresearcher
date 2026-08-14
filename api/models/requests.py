@@ -33,6 +33,31 @@ ALLOWED_API_KEY_ENVS = frozenset(
 )
 
 
+def _clean_api_keys(
+    value: Optional[Dict[str, str]],
+) -> Optional[Dict[str, str]]:
+    """Validate and normalize a per-provider API key mapping.
+
+    Shared by every request model that carries user credentials, so the three
+    entry points (create / clarify / chat) enforce exactly the same rules.
+    """
+    if value is None:
+        return None
+    cleaned: Dict[str, str] = {}
+    for env_name, key_value in value.items():
+        if env_name not in ALLOWED_API_KEY_ENVS:
+            raise ValueError(
+                f"API key {env_name!r} is not allowed. "
+                f"Allowed: {sorted(ALLOWED_API_KEY_ENVS)}"
+            )
+        if not isinstance(key_value, str) or not key_value.strip():
+            raise ValueError(
+                f"API key value for {env_name!r} must be a non-empty string"
+            )
+        cleaned[env_name] = key_value.strip()
+    return cleaned or None
+
+
 class CreateSessionRequest(BaseModel):
     """Request to create a new research session"""
 
@@ -112,21 +137,7 @@ class CreateSessionRequest(BaseModel):
     def _validate_api_keys(
         cls, value: Optional[Dict[str, str]]
     ) -> Optional[Dict[str, str]]:
-        if value is None:
-            return None
-        cleaned: Dict[str, str] = {}
-        for env_name, key_value in value.items():
-            if env_name not in ALLOWED_API_KEY_ENVS:
-                raise ValueError(
-                    f"API key {env_name!r} is not allowed. "
-                    f"Allowed: {sorted(ALLOWED_API_KEY_ENVS)}"
-                )
-            if not isinstance(key_value, str) or not key_value.strip():
-                raise ValueError(
-                    f"API key value for {env_name!r} must be a non-empty string"
-                )
-            cleaned[env_name] = key_value.strip()
-        return cleaned or None
+        return _clean_api_keys(value)
 
 
 class ChatSessionRequest(BaseModel):
@@ -138,6 +149,17 @@ class ChatSessionRequest(BaseModel):
         description="Pregunta de seguimiento sobre la investigación",
         max_length=5000,
     )
+    # The writer model needs credentials for every follow-up question too — the
+    # backend has none of its own in production. Re-sent by the frontend on each
+    # chat turn. Never persisted.
+    api_keys: Optional[Dict[str, str]] = Field(default=None)
+
+    @field_validator("api_keys")
+    @classmethod
+    def _validate_api_keys(
+        cls, value: Optional[Dict[str, str]]
+    ) -> Optional[Dict[str, str]]:
+        return _clean_api_keys(value)
 
 
 class ContinueSessionRequest(BaseModel):
@@ -158,18 +180,4 @@ class ContinueSessionRequest(BaseModel):
     def _validate_api_keys(
         cls, value: Optional[Dict[str, str]]
     ) -> Optional[Dict[str, str]]:
-        if value is None:
-            return None
-        cleaned: Dict[str, str] = {}
-        for env_name, key_value in value.items():
-            if env_name not in ALLOWED_API_KEY_ENVS:
-                raise ValueError(
-                    f"API key {env_name!r} is not allowed. "
-                    f"Allowed: {sorted(ALLOWED_API_KEY_ENVS)}"
-                )
-            if not isinstance(key_value, str) or not key_value.strip():
-                raise ValueError(
-                    f"API key value for {env_name!r} must be a non-empty string"
-                )
-            cleaned[env_name] = key_value.strip()
-        return cleaned or None
+        return _clean_api_keys(value)

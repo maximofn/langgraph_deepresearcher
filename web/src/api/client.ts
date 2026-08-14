@@ -28,6 +28,37 @@ function getOrCreateClientId(): string {
   return id;
 }
 
+/**
+ * Error thrown by every failed API call.
+ *
+ * It extends `Error` on purpose: callers do `err instanceof Error ? err.message
+ * : <fallback>`, and a plain object silently loses to the fallback — which used
+ * to hide the backend's own explanation ("Missing API keys: ...") behind a
+ * generic message at the exact moment the user needs to read it.
+ */
+export class ApiRequestError extends Error {
+  code: string;
+  status: number;
+  details?: Record<string, unknown> | null;
+
+  constructor(status: number, body: unknown, fallback: string) {
+    const payload = (body ?? {}) as Partial<ApiError> & { detail?: unknown };
+    // Two shapes reach us: {code, message, details} from the app's own handlers,
+    // and {detail} from raw FastAPI HTTPExceptions.
+    const detailText =
+      typeof payload.detail === 'string' ? payload.detail : undefined;
+    super(payload.message || detailText || fallback);
+    this.name = 'ApiRequestError';
+    this.status = status;
+    this.code = payload.code || 'http_error';
+    this.details =
+      payload.details ??
+      (payload.detail && typeof payload.detail === 'object'
+        ? (payload.detail as Record<string, unknown>)
+        : undefined);
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
@@ -38,13 +69,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
   if (!res.ok) {
-    let err: ApiError;
+    let body: unknown = null;
     try {
-      err = (await res.json()) as ApiError;
+      body = await res.json();
     } catch {
-      err = { code: 'http_error', message: `${res.status} ${res.statusText}` };
+      // Non-JSON response (proxy error, 502 HTML page…) — fall back below.
     }
-    throw err;
+    throw new ApiRequestError(res.status, body, `${res.status} ${res.statusText}`);
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -76,10 +107,15 @@ export const api = {
       }),
     }),
 
-  chat: (id: string, message: string) =>
+  // The writer needs credentials on every follow-up turn too — the backend has
+  // none of its own in production.
+  chat: (id: string, message: string, apiKeys?: Record<string, string>) =>
     request<StartResearchResponse>(`/sessions/${id}/chat`, {
       method: 'POST',
-      body: JSON.stringify({ message } satisfies ChatSessionRequest),
+      body: JSON.stringify({
+        message,
+        ...(apiKeys && Object.keys(apiKeys).length > 0 ? { api_keys: apiKeys } : {}),
+      } satisfies ChatSessionRequest),
     }),
 
   deleteSession: (id: string) =>

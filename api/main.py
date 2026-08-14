@@ -19,6 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from api.config import settings
 from api.database.checkpointer import get_checkpointer_manager
 from api.database.db import init_db
+from api.rate_limit import SLOWAPI_AVAILABLE, limiter
 from api.routes import models as models_route
 from api.routes import sessions, websocket
 from api.utils.exceptions import APIException, ErrorResponse
@@ -70,20 +71,18 @@ app.add_middleware(
 
 
 # ---------- Rate limiting ----------
-if settings.enable_rate_limit:
-    try:
-        from slowapi import Limiter, _rate_limit_exceeded_handler
-        from slowapi.errors import RateLimitExceeded
-        from slowapi.middleware import SlowAPIMiddleware
-        from slowapi.util import get_remote_address
+# The limits themselves are declared per endpoint via @limiter.limit(...) in
+# api/routes/sessions.py. Here we only wire the limiter into the app and
+# register the handler that turns a breach into a 429.
+if SLOWAPI_AVAILABLE:
+    from slowapi import _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
 
-        limiter = Limiter(key_func=get_remote_address)
-        app.state.limiter = limiter
-        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-        app.add_middleware(SlowAPIMiddleware)
-    except ImportError:
-        logger.warning("slowapi not installed; rate limiting disabled")
-        app.state.limiter = None
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    logger.info(
+        "Rate limiting %s", "enabled" if settings.enable_rate_limit else "disabled"
+    )
 else:
     app.state.limiter = None
 
