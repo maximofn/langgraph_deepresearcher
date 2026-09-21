@@ -1,0 +1,6 @@
+# Deep Researcher — web UI. See also https://www.maximofn.com/robots.txt
+User-agent: *
+Allow: /
+Disallow: /session/
+
+Sitemap: https://deepresearcher.maximofn.com/sitemap.xml
