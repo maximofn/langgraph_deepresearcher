@@ -3,17 +3,98 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      Cabecera SEO y bloque estático dentro de #root: Ahrefs y Google leen el
+      HTML sin ejecutar JavaScript y veían una página sin descripción, sin H1,
+      sin texto ni enlaces (informe SEO del portfolio, 21/09/2026). React
+      reemplaza el contenido de #root al montar (createRoot vacía el contenedor).
+    -->
+    <title>Deep Researcher — multi-agent research with LangGraph</title>
+    <meta name="description" content="Multi-agent research system built with LangGraph: a supervisor splits your question into topics, parallel search sub-agents gather sources, and a writer agent produces a sourced markdown report. Live streaming, bring-your-own API keys." />
+    <link rel="canonical" href="https://deepresearcher.maximofn.com/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="MaximoFN" />
+    <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>Deep Researcher</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Deep Researcher" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://deepresearcher.maximofn.com/" />
+    <meta property="og:title" content="Deep Researcher — multi-agent research with LangGraph" />
+    <meta property="og:description" content="A supervisor agent splits your question into topics, parallel sub-agents search and compress sources, and a writer produces a sourced markdown report. Streams live; your API keys never leave your browser session." />
+    <meta property="og:image" content="https://images.maximofn.com/langgraph-deepresearcher-informe.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="628" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:alt" content="Deep Researcher: a finished research report with its sources" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Maximo_fn" />
+    <meta name="twitter:creator" content="@Maximo_fn" />
+    <meta name="twitter:title" content="Deep Researcher — multi-agent research with LangGraph" />
+    <meta name="twitter:description" content="A supervisor agent splits your question into topics, parallel sub-agents search and compress sources, and a writer produces a sourced markdown report." />
+    <meta name="twitter:image" content="https://images.maximofn.com/langgraph-deepresearcher-informe.webp" />
+    <meta name="twitter:image:alt" content="Deep Researcher: a finished research report with its sources" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Deep Researcher",
+      "url": "https://deepresearcher.maximofn.com/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "Web",
+      "description": "Multi-agent research system built with LangGraph: a supervisor splits your question into topics, parallel search sub-agents gather sources, and a writer agent produces a sourced markdown report.",
+      "image": "https://images.maximofn.com/langgraph-deepresearcher-informe.webp",
+      "author": { "@type": "Person", "name": "MaximoFN", "url": "https://www.maximofn.com/" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+    }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <style>
+      /* Bloque estático que ven los rastreadores; React lo sustituye al montar */
+      .static-landing { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.25rem; line-height: 1.6; font-family: Geist, system-ui, sans-serif; }
+      .static-landing h1 { font-size: 2rem; font-weight: 600; margin: 0 0 .5rem; }
+      .static-landing p { color: #a3a3a3; margin: 0 0 1rem; }
+      .static-landing a { color: #2dd4bf; }
+      .static-landing ul { padding-left: 1.25rem; }
+    </style>
   </head>
   <body class="bg-neutral-950 text-neutral-100 antialiased">
-    <div id="root"></div>
+    <noscript>
+      Deep Researcher needs JavaScript to run. Read more at
+      <a href="https://www.maximofn.com/deepresearcher/">maximofn.com/deepresearcher</a>.
+    </noscript>
+    <div id="root">
+      <main class="static-landing">
+        <h1>Deep Researcher</h1>
+        <p>
+          Multi-agent research system built with LangGraph. A supervisor agent
+          breaks your question down into topics and launches search sub-agents in
+          parallel; each one compresses its findings before handing them to a
+          writer agent that produces the final report in markdown, with sources.
+        </p>
+        <p>
+          Events stream live over WebSockets, every role can use a different
+          model, and you bring your own API keys: they are sent with the session
+          and never stored on the server.
+        </p>
+        <ul>
+          <li><a href="https://www.maximofn.com/deepresearcher/">How Deep Researcher is built</a> (project page)</li>
+          <li><a href="https://www.maximofn.com/en/deepresearcher-supervisor/">The supervisor agent</a> · <a href="https://www.maximofn.com/en/deepresearcher-writer/">The writer agent</a> (articles)</li>
+          <li><a href="https://github.com/maximofn/langgraph_deepresearcher">Source code on GitHub</a></li>
+          <li><a href="https://www.maximofn.com/">MaximoFN</a>, author</li>
+        </ul>
+        <p>Loading the application…</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
